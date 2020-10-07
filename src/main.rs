@@ -1,5 +1,8 @@
+pub mod model;
+
 #[macro_use] extern crate rocket;
 
-fn main() {
-    println!("Hello, world!");
+fn main()
+{
+    //Hook endpoints
 }

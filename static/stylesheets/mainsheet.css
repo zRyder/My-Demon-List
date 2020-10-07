@@ -75,7 +75,6 @@
 
 #searchbar_container button
 {
-	float: right;
 	height: 28px;
 	width: 33px;
 	border: none;
@@ -83,4 +82,11 @@
 	border-left-color:#CCCCCC;
 	border-width: 3px;
 	outline: none;
+	padding: 2px 0 0 0;
+	transition: 0.3s;
+}
+
+#searchbar_container button:hover
+{
+	background-color: #cd4242;
 }

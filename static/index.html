@@ -6,7 +6,7 @@
 <title>My Demon List - Home</title>
 </head>
 
-<body>
+<body onResize="reset_hamburger()">
 	<div id="header">
 		<img src = "images/mydemonlistlogo.png" alt="My Demon List" style="max-height: 120px; max-width: 400px;">
 		<div id="navbar">
@@ -19,7 +19,11 @@
 				<div class="nav_elements" style="width: 105px">Contact</div>
 			</div>
 			
-			<!--SEARCH BAR SECTION-->
+			<div class="hamburger_container" onClick="toggle_hamburger()">
+				<div class="hamburger_button"></div>
+			</div>
+			
+		  <!--SEARCH BAR SECTION-->
 			<div id = "searchbar_container">
 				<div style="display: flex; flex-wrap: nowrap">
 					<input id = "searchbar" placeholder="Search for a rated demon level...">
@@ -28,6 +32,17 @@
 			</div>
 			
 		</div>
+	</div> <!---END OF HEADER--->
+	<div class="hamburger_menu">
+		<div class="hamburger_elements">Home</div>
+		<div class="hamburger_elements">Top Rated Demons</div>
+		<div class="hamburger_elements">New Demons</div>
+		<div class="hamburger_elements">Contact</div>
 	</div>
+	<div id="container">
+	
+	</div>
+	
+<script src="scripts/mainscript.js"></script>
 </body>
 </html>

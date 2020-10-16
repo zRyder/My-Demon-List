@@ -30,6 +30,7 @@
 	width: 800px;
 	display: flex;
 	justify-content: space-evenly;
+	margin-left: 10px;
 }
 .nav_elements
 {
@@ -51,12 +52,13 @@
 
 #searchbar_container
 {
-	width: 700px;
+	width: 380px;
 	height: inherit;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-wrap: wrap;
+	margin-right: 10px;
 }
 
 #searchbar_container input
@@ -70,7 +72,7 @@
 #searchbar
 {
 	height: 22px;
-	width: 350px;
+	width: 300px;
 }
 
 #searchbar_container button
@@ -84,9 +86,142 @@
 	outline: none;
 	padding: 2px 0 0 0;
 	transition: 0.3s;
+	cursor: pointer;
 }
 
 #searchbar_container button:hover
 {
 	background-color: #cd4242;
+}
+
+.hamburger_container
+{
+	display: none;
+	justify-content: center;
+	align-items: center;
+	height: inherit;
+	min-width: 65px;
+	width: 75px;
+	margin-left: 10px;
+	cursor: pointer;
+	transition: all .3s ease-in-out;
+}
+
+.hamburger_container:hover
+{
+	background-color: #255EA0;
+}
+
+.hamburger_button
+{
+	width: 40px;
+	height: 6px;
+	background: white;
+	transition: all .3s ease-in-out;
+}
+
+.hamburger_button::before,
+.hamburger_button::after
+{
+	content: '';
+	position: absolute;
+	width: 40px;
+	height: 6px;
+	background: white;
+	transition: all .3s ease-in-out;
+}
+
+.hamburger_button::before
+{
+	transform: translateY(-13px);
+}
+
+.hamburger_button::after
+{
+	transform: translateY(13px);
+}
+
+.hamburger_container.open .hamburger_button
+{
+	transform: translateX(-65px);
+	background: transparent;
+}
+
+.hamburger_container.open .hamburger_button::before
+{
+	transform: rotate(45deg) translate(46px, -46px);
+}
+
+.hamburger_container.open .hamburger_button::after
+{
+	transform: rotate(-45deg) translate(46px, 46px);
+}
+
+.hamburger_menu
+{
+	display: none;
+	flex-direction: column;
+	width: 100%;
+	height: 210px;
+	background-color:#1E4E85;
+	padding: 10px 0px;
+}
+
+.hamburger_elements
+{
+	font-family: Verdana, Montserrat, Arial;
+	font-weight: bold;
+	font-size: 20px;
+	color: white;
+	height: 50px;
+	width: inherit;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: 0.3s;
+}
+
+.hamburger_elements:hover
+{
+	background-color:#2969B1;
+	text-decoration: underline;
+}
+
+/*END OF HEADER*/
+
+#container
+{
+	margin: 0 auto;
+	width: 960px;
+	height: 1000px;
+	background-color:#F6F6F6;
+}
+#dynamic_container
+{
+	margin: 0 auto;
+	width: 960px;
+	height: auto;
+	background-color:#F6F6F6;
+}
+
+@media (max-width: 960px)
+{
+	#nav_elements_container
+	{
+		display: none;
+	}
+	.hamburger_container
+	{
+		display: flex;
+	}
+}
+
+@media (max-width: 961px)
+{
+	.hamburger_menu
+	{
+		display: none;
+	}
+	
+	
 }

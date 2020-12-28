@@ -1,0 +1,127 @@
+extern crate dash_rs;
+extern crate reqwest;
+
+use dash_rs::
+{
+    model::
+    {
+        level::
+        {
+            ListedLevel,
+        },
+    },
+
+    request::
+    {
+        level::
+        {
+            LevelsRequest,
+        }
+    },
+    Thunk, ThunkContent, Base64Decoded,
+};
+
+use dash_rs::
+{
+    response::
+    {
+        ResponseError,
+    },
+
+    response,
+};
+
+use reqwest::
+{
+    blocking::Client,
+    Error,
+};
+
+use rocket::
+{
+    logger::error,
+
+    Request, Response,
+};
+
+
+/**
+  Models a Geometry Dash in game search by making a search for a given &str 'search_string'. The request is posted to http://boomlings.com/databases/getGJLevels21.php endpoint. A Result is returned that wraps either the sucessful result of the raw response data as string or returns the reqwest error that resulted in the failure of the POST request
+**/
+
+pub fn prepare_search_request(search_string: &str) -> Result<String, Error>
+{
+    let request = LevelsRequest::default(); //Request object for getGJLevels21
+    let get_gj_levels21_endpoint = LevelsRequest::to_url(&request); //URL to the getGJLevels21 endpoint from dash-rs
+
+    let request_data = request // gets parameters for the post request
+        .search(search_string)
+        .to_string();
+
+    let client = Client::new();
+    let response = client
+        .post(&get_gj_levels21_endpoint )
+        .body(request_data)
+        .header(reqwest::header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+        .send();
+
+    match response
+    {
+        Ok(response) =>
+            {
+                response.text()
+            },
+        Err(err) => Err(err)
+    }
+}
+
+/**
+  Helper function that calls the parse_get_gj_levels_response function found in the dash-rs library. Function returns a result that contains either the successful list of levels Vec<ListedLevel> or the custom dash-rs response error, this is unlikely to happen but can happen due to a malformed unprocessed response stream.
+**/
+
+pub fn process_levels21_response(stream: &str) -> Result<Vec<ListedLevel>, ResponseError>
+{
+    response::parse_get_gj_levels_response(stream)
+}
+
+/**
+  returns the description of any given level, it takes in a optional thunk that would ideally contain the encrypted level description, if the description can be decoded then it is wrapped in an Option<String> and returned, else None.
+**/
+
+pub fn get_level_description<'a>(thunk: &Option<Thunk<'a, Base64Decoded<'a>>>) -> Option<String>
+{
+    match thunk
+    {
+        Some(thunk) =>
+            {
+                Some(match thunk
+                {
+                    Thunk::Processed(processed) => //Already decoded description, route may not be possible
+                        {
+                            processed.0.to_string()
+                        },
+                    Thunk::Unprocessed(unprocessed) => //case to decode description
+                        {
+                            Base64Decoded::from_unprocessed(unprocessed).unwrap().0.to_string()
+                        },
+                })
+            },
+        None => None, //Occurs if the level has no description
+    }
+}
+
+// impl rocket::response::Responder for Vec<ListedLevel>
+// {
+//     fn respond_to(self, request: &Request<'r>) -> rocket::response::Result<'r>
+//     {
+//
+//         for level in Self
+//         {
+//
+//         }
+//
+//         Response::build()
+//             .raw_body()
+//
+//     }
+// }

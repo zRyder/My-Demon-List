@@ -1,9 +1,4 @@
-use crate::model::level::
+pub struct DemonList
 {
-    GdLevel
-};
-
-pub struct DemonList<'a>
-{
-    levels: GdLevel<'a>
+    list_id: usize,
 }

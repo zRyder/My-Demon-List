@@ -15,11 +15,11 @@ use rocket_contrib::serve::
 };
 use std::error::Error;
 
-
 pub mod model;
 pub mod gd;
 pub mod test;
 pub mod routes;
+
 
 fn main()
 {
@@ -27,5 +27,6 @@ fn main()
     // test::test();
     rocket::ignite()
         .mount("/",StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static/")))
+        .mount("/", routes![routes::search])
         .launch();
 }

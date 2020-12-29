@@ -1,12 +1,18 @@
 extern crate reqwest;
 use crate::gd;
 extern crate dash_rs;
+extern crate serde_json;
 
+
+use serde_json::
+{
+    Map, Value,
+};
 
 pub fn test()
 {
-
-    let test = gd::prepare_search_request("Test Machine");
+    let page:u32 = 1;
+    let test = gd::prepare_search_request("Based", page);
 
     match test
     {
@@ -14,22 +20,28 @@ pub fn test()
             {
                 let level_list = gd::process_levels21_response(&data);
 
-                println!("{:?}", &level_list);
+                //println!("{:?}", &level_list);
 
                 match level_list
                 {
                     Ok(list) =>
                         {
-                            let level = list.get(0).unwrap();
-                            let based_desc = gd::get_level_description(&level.description);
-                            match based_desc
-                            {
-                                Some(desc) =>
-                                    {
-                                    println!("{}", desc);
-                                },
-                                None => println!("No Description provided"),
-                            }
+                            let j = serde_json::to_string(&list).unwrap();
+
+                            println!("{}", j);
+
+                            // let level = list.get(0).unwrap();
+                            // let creator_name = gd::get_creator_name(&level.creator.as_ref().unwrap());
+                            // println!("{}, {}", level.creator.as_ref().unwrap().name, level.name);
+                            // let based_desc = gd::get_level_description(&level.description);
+                            // match based_desc
+                            // {
+                            //     Some(desc) =>
+                            //         {
+                            //         println!("{}", desc);
+                            //     },
+                            //     None => println!("No Description provided"),
+                            // }
                         },
                     Err(err) => println!("Couldn't parse GD stream, {}", err)
                 };

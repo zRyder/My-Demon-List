@@ -1,5 +1,7 @@
 extern crate dash_rs;
 extern crate reqwest;
+extern crate serde_json;
+extern crate chrono;
 
 use dash_rs::
 {
@@ -9,6 +11,7 @@ use dash_rs::
         {
             ListedLevel,
         },
+        creator::Creator,
     },
 
     request::
@@ -18,17 +21,14 @@ use dash_rs::
             LevelsRequest,
         }
     },
-    Thunk, ThunkContent, Base64Decoded,
-};
 
-use dash_rs::
-{
     response::
     {
         ResponseError,
     },
 
     response,
+    Thunk, ThunkContent, Base64Decoded,
 };
 
 use reqwest::
@@ -39,23 +39,33 @@ use reqwest::
 
 use rocket::
 {
+    http::
+    {
+        ContentType, Status,
+    },
     logger::error,
-
     Request, Response,
 };
 
+use serde_json::
+{
+    Map, Value,
+};
+
+use chrono::prelude::*;
 
 /**
   Models a Geometry Dash in game search by making a search for a given &str 'search_string'. The request is posted to http://boomlings.com/databases/getGJLevels21.php endpoint. A Result is returned that wraps either the sucessful result of the raw response data as string or returns the reqwest error that resulted in the failure of the POST request
 **/
 
-pub fn prepare_search_request(search_string: &str) -> Result<String, Error>
+pub fn prepare_search_request(search_string: &str, page: u32) -> Result<String, Error>
 {
     let request = LevelsRequest::default(); //Request object for getGJLevels21
     let get_gj_levels21_endpoint = LevelsRequest::to_url(&request); //URL to the getGJLevels21 endpoint from dash-rs
 
     let request_data = request // gets parameters for the post request
         .search(search_string)
+        .page(page-1)
         .to_string();
 
     let client = Client::new();
@@ -110,18 +120,38 @@ pub fn get_level_description<'a>(thunk: &Option<Thunk<'a, Base64Decoded<'a>>>) -
     }
 }
 
-// impl rocket::response::Responder for Vec<ListedLevel>
+pub fn get_creator_name<'a>(creator: &Creator) -> String
+{
+    creator.name.to_string()
+}
+
+// impl rocket::response::Responder<'_> for Vec<ListedLevel<'_>>
 // {
 //     fn respond_to(self, request: &Request<'r>) -> rocket::response::Result<'r>
 //     {
 //
-//         for level in Self
+//         let json = serde_json::to_string(&self);
+//
+//         match json
 //         {
-//
+//             Ok(stream) =>
+//                 {
+//                     Response::build()
+//                         .raw_header("date", format!("{}", Local::now()))
+//                         .header(ContentType::new("application", "json"))
+//                         .sized_body(stream)
+//                         .status(Status::Ok)
+//                         .ok()
+//                 },
+//             Err(err) =>
+//                 {
+//                     Response::build()
+//                         .raw_header("date", format!("{}", Local::now()))
+//                         .header(ContentType::new("application", "text"))
+//                         .sized_body(err)
+//                         .status(Status::NotFound)
+//                         .ok()
+//                 }
 //         }
-//
-//         Response::build()
-//             .raw_body()
-//
 //     }
 // }

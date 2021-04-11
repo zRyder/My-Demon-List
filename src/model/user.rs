@@ -1,13 +1,15 @@
 extern crate serde;
 extern crate argonautica;
-
+extern crate regex;
+extern crate nanoid;
 
 use serde::{Serialize, Deserialize};
 use crate::schema::users;
-
-
 use argonautica::Hasher;
 use argonautica::Verifier;
+use regex::Regex;
+use std::num::ParseIntError;
+
 
 ///Struct that is utilized to create new users. Post requests made to the /create/user endpoint. Data here will come from the create account form
 //Will derive FromForm and Deserialze here
@@ -22,12 +24,6 @@ pub struct CreateUser
 
     ///Password of the prospective user, this is encoded and should not be used anywhere in code. This will get hashed as soon as the create user process is invoked.
     pub(crate) password: String,
-
-    ///The Geometry Dash username of prospective user, this will not be stored in the database table and will serve as a method to get the Geometry Dash User ID which will be stored in My Demon List's users database
-    pub(crate) geometry_dash_username: String,
-
-    ///The Geometry Dash password of prospective user, this will not be stored in the database table and will serve as a method to get the Geometry Dash User ID which will be stored in My Demon List's users database
-    pub(crate) geometry_dash_password: String,
 }
 
 ///Struct representing a representing user logging in. This will be used as user provided data to authenticate and preform authorized actions
@@ -43,7 +39,8 @@ pub struct LoginUser
 }
 
 ///Struct representing existing user. This should be used strictly to authenticate a user.
-//#[derive(Insertable)]
+///
+
 pub struct AuthInfo
 {
     user_id: u32,
@@ -56,7 +53,7 @@ pub struct AuthInfo
 pub struct DBUser
 {
     #[column_name = "userId"]
-    pub user_id: i32,
+    pub user_id: u32,
 
     #[column_name = "userName"]
     pub user_name: String,
@@ -66,9 +63,6 @@ pub struct DBUser
 
     #[column_name = "email"]
     pub email: String,
-
-    #[column_name = "gdUserId"]
-    pub gd_user_id: String,
 }
 
 impl CreateUser
@@ -88,7 +82,34 @@ impl CreateUser
         }
     }
 
-    pub(crate) fn password_has_number(&self) -> bool
+    pub(crate) fn is_valid_email(&self) -> bool
+    {
+        //THIS REGEX WILL VALIDATE EMAIL ADDRESSES DO NOT CHANGE
+        let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
+
+        if email_regex.is_match(self.email.as_str())
+        {
+            true
+        }
+        else
+        {
+            false
+        }
+    }
+
+    pub(crate) fn is_valid_password(&self) -> bool
+    {
+        if self.password.len() >= 8 && self.has_symbol() && self.has_number() && self.has_capital_letter()
+        {
+            true
+        }
+        else
+        {
+            false
+        }
+    }
+
+    fn has_number(&self) -> bool
     {
         for character in self.password.chars()
         {
@@ -100,7 +121,7 @@ impl CreateUser
         false
     }
 
-    pub(crate) fn password_has_symbol(&self)-> bool
+    fn has_symbol(&self)-> bool
     {
         for character in self.password.chars()
         {
@@ -112,7 +133,19 @@ impl CreateUser
         false
     }
 
-    pub(crate) fn hash_password(&self)
+    fn has_capital_letter(&self) -> bool
+    {
+        for character in self.password.chars()
+        {
+            if character.is_uppercase()
+            {
+                return true
+            }
+        }
+        false
+    }
+
+    pub(crate) fn hash_password(&self) -> String
     {
         let mut hasher = Hasher::default();
         let hash = hasher
@@ -120,8 +153,6 @@ impl CreateUser
             .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
             .hash()
             .unwrap();
-
-        println!("{}", &hash);
 
         //TO VERIFY PASSWORDS
         let mut verifier = Verifier::default();
@@ -132,9 +163,8 @@ impl CreateUser
             .verify()
             .unwrap();
 
-        println!("{}", is_valid);
+        hash
     }
-
 }
 
 impl DBUser
@@ -147,7 +177,12 @@ impl DBUser
             user_name: "".to_string(),
             password_hash: "".to_string(),
             email: "".to_string(),
-            gd_user_id: "".to_string()
         }
     }
+}
+
+pub(crate) fn generate_user_id() -> Result<u32, ParseIntError>
+{
+    let range: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    nanoid::nanoid!(9, &range).parse::<u32>()
 }

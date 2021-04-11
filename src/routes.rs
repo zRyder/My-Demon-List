@@ -89,17 +89,14 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     /*
     1) Check is Username is valid DONE
     2) Check is Username is available within the database DONE
-    3) Check that Password contains number and symbol
-    4) Hash password
-    5) ensure that the email address is valid
-    6) verify that the GD username and password supplied belong to a valid GD account
-    7) Make sure the GDUserID isn't already in use
-    8) Generate UserID
-    8) Send verification email maybe?
+    3) Check that Password contains number, Symbol, and 8 characters DONE
+    4) Hash password DONE
+    5) ensure that the email address is valid DONE
+    8) Generate UserID DONE
+    8) Send verification email maybe? LATER???
     */
 
     let mut db_user_entry = user::DBUser::new();
-
 
     if create_info.is_valid_username() && (users.select(userName).filter(userName.eq(create_info.user_name.clone())).load::<String>(&*db_conn).unwrap().len() ==0)
     {
@@ -114,25 +111,90 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
         }
     }
 
-    if create_info.password_has_number() && create_info.password_has_symbol()
+    if create_info.is_valid_password()
     {
-
+        db_user_entry.password_hash = create_info.hash_password();;
+    }
+    else
+    {
+        return ApiResponse
+        {
+            json: Json("{error: invalid password}".to_string()),
+            status: Status::BadRequest,
+        }
     }
 
-    let user = user::DBUser{
-        user_id: 1,
-        user_name: create_info.user_name.clone(),
-        password_hash: create_info.password.clone(),
-        email: create_info.email.clone(),
-        gd_user_id: "16".to_string()
-    };
-
-    diesel::insert_into(schema::users::table).values(user).execute(&db_conn.0);
-
-    ApiResponse
+    if create_info.is_valid_email()
     {
-        json: Json("Success".to_string()),
-        status: Status::Ok,
+        db_user_entry.email = create_info.email.clone();
+    }
+    else
+    {
+        return ApiResponse
+        {
+            json: Json("{error: invalid email address}".to_string()),
+            status: Status::BadRequest,
+        }
+    }
+
+    loop
+    {
+        match user::generate_user_id()
+        {
+            Ok(user_id) =>
+                {
+                    let user_id_check = users.select(userId).filter(userId.eq(&user_id)).load::<u32>(&*db_conn);
+
+                    match user_id_check
+                    {
+                        Ok(user_id_result) =>
+                            {
+                                if user_id_result.len() == 0
+                                {
+                                    db_user_entry.user_id = user_id;
+                                    break;
+                                }
+                            }
+                        Err(e) =>
+                            {
+                                return ApiResponse
+                                {
+                                    json: Json(e.to_string()),
+                                    status: Status::InternalServerError,
+                                }
+                            }
+                    }
+
+                }
+            Err(e) =>
+                {
+                    return ApiResponse
+                    {
+                        json: Json(e.to_string()),
+                        status: Status::InternalServerError,
+                    }
+                }
+        }
+    }
+
+    return match diesel::insert_into(schema::users::table).values(db_user_entry).execute(&db_conn.0)
+    {
+        Ok(insert_check) =>
+            {
+                ApiResponse
+                {
+                    json: Json("message: user added successfully".to_string()),
+                    status: Status::Ok,
+                }
+            }
+        Err(e) =>
+            {
+                ApiResponse
+                {
+                    json: Json(e.to_string()),
+                    status: Status::InternalServerError,
+                }
+            }
     }
 }
 

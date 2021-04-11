@@ -16,7 +16,7 @@ use rocket_contrib::serve::StaticFiles;
 use tokio::runtime::Runtime;
 
 pub mod model;
-pub mod test;
+pub mod tests;
 pub mod routes;
 pub mod schema;
 

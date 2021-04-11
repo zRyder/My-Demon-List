@@ -73,7 +73,7 @@ pub struct DBUser
 
 impl CreateUser
 {
-    //Valid usernames have 3 alphanumeric characters and are not in the list of banned usernames
+    //Valid usernames have 3 alphanumeric characters and are not in the list of banned usernames.
     pub(crate) fn is_valid_username(&self) -> bool
     {
         if (self.user_name.chars().all(char::is_alphanumeric)) && (self.user_name.len() >= 3)

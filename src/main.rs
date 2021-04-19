@@ -28,7 +28,7 @@ fn main()
     // test::test();
     rocket::ignite()
         .mount("/",StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static/")))
-        .mount("/api", routes![routes::search, routes::create_user])
+        .mount("/api", routes![routes::search, routes::create_user, routes::login_user])
         .attach(DbConnection::fairing())
         .launch();
 }

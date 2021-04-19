@@ -32,10 +32,10 @@ pub struct CreateUser
 pub struct LoginUser
 {
     ///The username of the user who is attempting to login
-    user_name: String,
+    pub(crate) user_name: String,
 
     ///The non-encrypted password of the user who is trying to login in
-    password: String
+    pub(crate) password: String
 }
 
 ///Struct representing existing user. This should be used strictly to authenticate a user.

@@ -23,6 +23,7 @@ use rocket::response::Responder;
 use chrono::prelude::*;
 use rocket::request::Form;
 use diesel::{RunQueryDsl, QueryDsl, ExpressionMethods, prelude::*};
+use diesel::result::Error;
 
 #[get("/search/<search>?<page>")]
 pub fn search<'a>(search: String, page: Option<u32>) -> ApiResponse
@@ -157,11 +158,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
                             }
                         Err(e) =>
                             {
-                                return ApiResponse
-                                {
-                                    json: Json(e.to_string()),
-                                    status: Status::InternalServerError,
-                                }
+                                return database_error(e)
                             }
                     }
 
@@ -189,14 +186,75 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
             }
         Err(e) =>
             {
-                ApiResponse
-                {
-                    json: Json(e.to_string()),
-                    status: Status::InternalServerError,
-                }
+                database_error(e)
             }
     }
 }
+
+#[post("/users/login", format="form", data="<login_info>")]
+pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser>) -> ApiResponse
+{
+    /*
+        1) Check if a user with the given username exists
+        2) Grab the password hash from the DB and call an authenticate function
+        3) If valid, create a private cookie containing the user_id and if the user is an admin (Viprin, RobTop, or Ryder) add an admin cookie as well
+    */
+    use crate::schema::users::dsl::*;
+
+    if login_info.user_name.is_empty() || login_info.password.is_empty()
+    {
+        return ApiResponse
+        {
+            json: Json("username or password is empty".to_string()),
+            status: Status::BadRequest
+        }
+    }
+
+    let db_user_result = users.select(userName).filter(userName.eq(login_info.user_name.clone())).load::<String>(&*db_conn);
+    match db_user_result
+    {
+        Ok(user_result) =>
+            {
+                match user_result.first()
+                {
+                    Some(user) =>
+                        {
+                            //Authenticate that user here
+                        }
+                    None =>
+                        {
+                            return ApiResponse
+                            {
+                                json: Json("user does not exists".to_string()),
+                                status: Status::BadRequest
+                            }
+                        }
+                }
+            }
+        Err(e) =>
+            {
+                return database_error(e)
+            }
+    }
+
+    ApiResponse
+    {
+        json: Json("login successful".to_string()),
+        status: Status::Ok
+    }
+
+}
+
+
+fn database_error(e: Error) -> ApiResponse
+{
+    ApiResponse
+    {
+        json: Json(e.to_string()),
+        status: Status::InternalServerError,
+    }
+}
+
 
 pub struct ApiResponse
 {

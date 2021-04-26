@@ -65,6 +65,11 @@ pub struct DBUser
     pub email: String,
 }
 
+pub(crate) trait PasswordHash
+{
+    fn hash_password(&self) -> String;
+}
+
 impl CreateUser
 {
     //Valid usernames have 3 alphanumeric characters and are not in the list of banned usernames.
@@ -145,22 +150,18 @@ impl CreateUser
         false
     }
 
-    pub(crate) fn hash_password(&self) -> String
+
+}
+
+impl PasswordHash for CreateUser
+{
+    fn hash_password(&self) -> String
     {
         let mut hasher = Hasher::default();
         let hash = hasher
             .with_password(self.password.to_string())
             .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
             .hash()
-            .unwrap();
-
-        //TO VERIFY PASSWORDS
-        let mut verifier = Verifier::default();
-        let is_valid = verifier
-            .with_hash(hash.clone())
-            .with_password("Kingdom703@")
-            .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
-            .verify()
             .unwrap();
 
         hash
@@ -181,8 +182,40 @@ impl DBUser
     }
 }
 
+impl LoginUser
+{
+    pub(crate) fn verify_password_hash(&self, hash: &String) -> Result<bool, argonautica::Error>
+    {
+
+        //TO VERIFY PASSWORDS
+        let mut verifier = Verifier::default();
+        let is_valid = verifier
+            .with_hash(hash)
+            .with_password(&self.password)
+            .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
+            .verify();
+
+        is_valid
+    }
+}
+
 pub(crate) fn generate_user_id() -> Result<u32, ParseIntError>
 {
     let range: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     nanoid::nanoid!(9, &range).parse::<u32>()
+}
+
+impl PasswordHash for LoginUser
+{
+    fn hash_password(&self) -> String
+    {
+        let mut hasher = Hasher::default();
+        let hash = hasher
+            .with_password(self.password.to_string())
+            .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
+            .hash()
+            .unwrap();
+
+        hash
+    }
 }

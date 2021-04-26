@@ -11,7 +11,7 @@ use rocket_contrib::json::{Json, JsonValue};
 
 use rocket::{http::
              {
-                 ContentType, Status,
+                 ContentType, Status, Cookie, Cookies,
              }, logger::error, Request, Response, response};
 
 use crate::model::
@@ -24,6 +24,7 @@ use chrono::prelude::*;
 use rocket::request::Form;
 use diesel::{RunQueryDsl, QueryDsl, ExpressionMethods, prelude::*};
 use diesel::result::Error;
+use crate::model::user::PasswordHash;
 
 #[get("/search/<search>?<page>")]
 pub fn search<'a>(search: String, page: Option<u32>) -> ApiResponse
@@ -176,7 +177,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
 
     return match diesel::insert_into(schema::users::table).values(db_user_entry).execute(&db_conn.0)
     {
-        Ok(insert_check) =>
+        Ok(_insert_check) =>
             {
                 ApiResponse
                 {
@@ -192,7 +193,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
 }
 
 #[post("/users/login", format="form", data="<login_info>")]
-pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser>) -> ApiResponse
+pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser>, mut cookies: Cookies) -> ApiResponse
 {
     /*
         1) Check if a user with the given username exists
@@ -211,7 +212,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser
     }
 
     let db_user_result = users.select(userName).filter(userName.eq(login_info.user_name.clone())).load::<String>(&*db_conn);
-    match db_user_result
+    return match db_user_result
     {
         Ok(user_result) =>
             {
@@ -220,10 +221,67 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser
                     Some(user) =>
                         {
                             //Authenticate that user here
+                            let maybe_user_password_hash = users.select(passwordHash).filter(userName.eq(user)).load::<String>(&*db_conn);
+                            match maybe_user_password_hash
+                            {
+                                Ok(user_password_hash) =>
+                                    {
+                                        match login_info.verify_password_hash(&user_password_hash.first().unwrap())
+                                        {
+                                            Ok(is_authenticated) =>
+                                                {
+                                                    if is_authenticated
+                                                    {
+                                                        let mut user_cookie: Cookie;
+                                                        let maybe_user_id = users.select(userId).filter(userName.eq(user)).load::<u32>(&*db_conn);
+
+                                                        match maybe_user_id
+                                                        {
+                                                            Ok(user_id) =>
+                                                                {
+                                                                    user_cookie = Cookie::build("user_id", user_id.first().unwrap().to_string())
+                                                                        .path("/")
+                                                                        .finish();
+                                                                    cookies.add_private(user_cookie);
+                                                                    println!("I ran");
+                                                                }
+                                                            Err(e) =>
+                                                                {
+                                                                    return database_error(e)
+                                                                }
+                                                        }
+                                                        ApiResponse
+                                                        {
+                                                            json: Json("login successful".to_string()),
+                                                            status: Status::Ok
+                                                        }
+                                                    } else {
+                                                        ApiResponse
+                                                        {
+                                                            json: Json("invalid password".to_string()),
+                                                            status: Status::Forbidden
+                                                        }
+                                                    }
+                                                }
+                                            Err(e) =>
+                                                {
+                                                    ApiResponse
+                                                    {
+                                                        json: Json(e.to_string()),
+                                                        status: Status::InternalServerError
+                                                    }
+                                                }
+                                        }
+                                    }
+                                Err(e) =>
+                                    {
+                                        database_error(e)
+                                    }
+                            }
                         }
                     None =>
                         {
-                            return ApiResponse
+                            ApiResponse
                             {
                                 json: Json("user does not exists".to_string()),
                                 status: Status::BadRequest
@@ -233,16 +291,9 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<user::LoginUser
             }
         Err(e) =>
             {
-                return database_error(e)
+                database_error(e)
             }
     }
-
-    ApiResponse
-    {
-        json: Json("login successful".to_string()),
-        status: Status::Ok
-    }
-
 }
 
 

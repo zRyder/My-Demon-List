@@ -1,6 +1,7 @@
 pub mod tests
 {
     use std::error::Error;
+    use crate::model::user::PasswordHash;
 
     #[test]
     pub async fn pass()

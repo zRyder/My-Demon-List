@@ -32,7 +32,7 @@ pub struct DbConnection(rocket_diesel::mysql::MysqlConnection);
 
 fn main()
 {
-    let connection = diesel::mysql::MysqlConnection::establish("mysql://root:Rayuwwe6@127.0.0.1:3306/my_demon_list_schema").unwrap();
+    let connection = diesel::mysql::MysqlConnection::establish("mysql://root:testdbserver@127.0.0.1:3306/my_demon_list_schema").unwrap();
     embedded_migrations::run_with_output(&connection, &mut std::io::stdout());
 
     // test::test();

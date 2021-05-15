@@ -1,5 +1,6 @@
 use argonautica::{Hasher, Verifier};
 use crate::schema::user_hash;
+use std::convert::Infallible;
 
 ///Struct representing existing user. This should be used strictly to authenticate a user.
 
@@ -54,4 +55,3 @@ impl LoginUser
         is_valid
     }
 }
-

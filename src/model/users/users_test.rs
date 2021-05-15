@@ -19,6 +19,14 @@ pub mod tests
     }
 
     #[test]
+    pub async fn session_id_test()
+    {
+        let id = crate::model::users::session::generate_session_id();
+
+        println!("{}", id);
+    }
+
+    #[test]
     pub async fn valid_password_test()
     {
         let test = crate::model::users::user::CreateUser

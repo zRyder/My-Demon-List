@@ -25,7 +25,6 @@ use model::{
 use diesel::Connection;
 
 pub mod model;
-pub mod tests;
 pub mod schema;
 
 #[database("mysql_db")]

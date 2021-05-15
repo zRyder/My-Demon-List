@@ -11,7 +11,8 @@ use crate::model::
     users::{
         user,
         user::PasswordHash,
-        auth
+        auth,
+        session
     },
 
 };
@@ -165,6 +166,12 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
             user_hash,
             passwordHash,
             userId as auth_userId
+        },
+        user_sessions::dsl::
+        {
+            user_sessions,
+            userId as session_userId,
+            sessionId
         }
     };
     /*
@@ -198,17 +205,33 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
                                     {
                                         if is_authenticated
                                         {
+                                            let session_id = session::generate_session_id();
                                             let user_cookie: Cookie;
-                                            user_cookie = Cookie::build("user_id", userid.to_string())
-                                                .path("/")
-                                                .finish();
-                                            cookies.add_private(user_cookie);
-                                            println!("I ran");
-
-                                            ApiResponse
+                                            let session_info = session::SessionInfo
                                             {
-                                                json: Json("login successful".to_string()),
-                                                status: Status::Ok
+                                                user_id: *userid,
+                                                session_id: session_id.clone()
+                                            };
+
+                                            match diesel::replace_into(user_sessions).values(session_info).execute(&db_conn.0)
+                                            {
+                                                Ok(_insert_check) =>
+                                                {
+                                                    user_cookie = Cookie::build("session", session_id)
+                                                        .path("/")
+                                                        .finish();
+                                                    cookies.add_private(user_cookie);
+
+                                                    ApiResponse
+                                                    {
+                                                        json: Json("login successful".to_string()),
+                                                        status: Status::Ok
+                                                    }
+                                                }
+                                                Err(e) =>
+                                                {
+                                                    api_response::database_error(e)
+                                                }
                                             }
                                         }
                                         else

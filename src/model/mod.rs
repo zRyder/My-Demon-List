@@ -1,4 +1,5 @@
 pub mod demon_list;
-pub mod user;
-pub mod gd;
+pub mod users;
+pub mod geometry_dash;
 pub mod rating;
+pub mod api_response;

@@ -17,7 +17,7 @@ use crate::model::
 
 };
 
-#[post("/users/create", format="form", data="<create_info>")]
+#[post("/create", format="form", data="<create_info>")]
 pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateUser>) -> ApiResponse
 {
     use crate::schema;
@@ -150,7 +150,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     }
 }
 
-#[post("/users/login", format="form", data="<login_info>")]
+#[post("/login", format="form", data="<login_info>")]
 pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser>, mut cookies: Cookies) -> ApiResponse
 {
     use crate::schema::

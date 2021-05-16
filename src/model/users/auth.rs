@@ -55,3 +55,34 @@ impl LoginUser
         is_valid
     }
 }
+
+pub(crate) fn is_valid_session(session_id: &str, dbconn: crate::DbConnection) -> bool
+{
+    use diesel::{ExpressionMethods, prelude::*, QueryDsl, RunQueryDsl};
+    use crate::schema::user_sessions::dsl::*;
+
+    let session_result = user_sessions.select(userId).filter(sessionId.eq(session_id)).load::<u32>(&dbconn.0);
+
+    match session_result
+    {
+        Ok(maybe_session) =>
+        {
+            match maybe_session.first()
+            {
+                Some(_session) =>
+                {
+                    true
+                }
+                None =>
+                {
+                    false
+                }
+            }
+        }
+        Err(_e) =>
+        {
+            false
+        }
+    }
+
+}

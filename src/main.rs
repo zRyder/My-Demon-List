@@ -1,7 +1,6 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 #![feature(in_band_lifetimes)]
 
-
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate futures;
@@ -21,6 +20,7 @@ use tokio::runtime::Runtime;
 use model::{
     geometry_dash,
     users,
+    rating,
 };
 use diesel::Connection;
 
@@ -35,10 +35,11 @@ fn main()
     let connection = diesel::mysql::MysqlConnection::establish("mysql://root:testdbserver@127.0.0.1:3306/my_demon_list_schema").unwrap();
     embedded_migrations::run_with_output(&connection, &mut std::io::stdout());
 
-    // test::test();
     rocket::ignite()
         .mount("/",StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static/")))
-        .mount("/api", routes![geometry_dash::routes::search, users::routes::create_user, users::routes::login_user])
+        .mount("/api/gd", routes![geometry_dash::routes::search])
+        .mount("/api/users", routes![users::routes::create_user, users::routes::login_user])
+        .mount("/api/rating", routes![rating::routes::rate_level])
         .attach(DbConnection::fairing())
         .launch();
 }

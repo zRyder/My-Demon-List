@@ -6,17 +6,16 @@ extern crate nanoid;
 use std::num::ParseIntError;
 
 use argonautica::Hasher;
-use argonautica::Verifier;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use dotenv;
+use std::env;
 
 use crate::schema::users;
 
 ///Struct that is utilized to create new users. Post requests made to the /create/user endpoint. Data here will come from the create account form
-//Will derive FromForm and Deserialze here
-#[derive(FromForm, Serialize)]
-pub struct CreateUser
-{
+#[derive(FromForm)]
+pub struct CreateUser {
     ///User name of the prospective user, this should be unique
     pub(crate) user_name: String,
 
@@ -30,8 +29,7 @@ pub struct CreateUser
 //For inserting new users into the database
 #[table_name = "users"]
 #[derive(Insertable)]
-pub struct DBUser
-{
+pub struct DBUser {
     #[column_name = "userId"]
     pub user_id: u32,
 
@@ -42,85 +40,71 @@ pub struct DBUser
     pub email: String,
 }
 
-pub(crate) trait PasswordHash
-{
+#[derive(FromForm)]
+pub struct UpdateUserName {
+    pub(crate) _method: String,
+    pub(crate) user_name: String
+}
+
+pub(crate) trait PasswordHash {
     fn hash_password(&self) -> String;
 }
 
-impl CreateUser
-{
+impl CreateUser {
     //Valid usernames have 3 alphanumeric characters and are not in the list of banned usernames.
-    pub(crate) fn is_valid_username(&self) -> bool
-    {
-        if (self.user_name.chars().all(char::is_alphanumeric)) && (self.user_name.len() >= 3)
-        {
+    pub(crate) fn is_valid_username(&self) -> bool {
+        if (self.user_name.chars().all(char::is_alphanumeric)) && (self.user_name.len() >= 3) {
             //CHECK FOR BANNED USERNAMES HERE
 
             true
         }
-        else
-        {
+        else {
             false
         }
     }
 
-    pub(crate) fn is_valid_email(&self) -> bool
-    {
+    pub(crate) fn is_valid_email(&self) -> bool {
         //THIS REGEX WILL VALIDATE EMAIL ADDRESSES DO NOT CHANGE
         let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
 
-        if email_regex.is_match(self.email.as_str())
-        {
+        if email_regex.is_match(self.email.as_str()) {
             true
         }
-        else
-        {
+        else {
             false
         }
     }
 
-    pub(crate) fn is_valid_password(&self) -> bool
-    {
-        if self.password.len() >= 8 && self.has_symbol() && self.has_number() && self.has_capital_letter()
-        {
+    pub(crate) fn is_valid_password(&self) -> bool {
+        if self.password.len() >= 8 && self.has_symbol() && self.has_number() && self.has_capital_letter() {
             true
         }
-        else
-        {
+        else {
             false
         }
     }
 
-    fn has_number(&self) -> bool
-    {
-        for character in self.password.chars()
-        {
-            if character.is_numeric()
-            {
+    fn has_number(&self) -> bool {
+        for character in self.password.chars() {
+            if character.is_numeric() {
                 return true
             }
         }
         false
     }
 
-    fn has_symbol(&self)-> bool
-    {
-        for character in self.password.chars()
-        {
-            if !(character.is_alphanumeric())
-            {
+    fn has_symbol(&self)-> bool {
+        for character in self.password.chars() {
+            if !(character.is_alphanumeric()) {
                 return true
             }
         }
         false
     }
 
-    fn has_capital_letter(&self) -> bool
-    {
-        for character in self.password.chars()
-        {
-            if character.is_uppercase()
-            {
+    fn has_capital_letter(&self) -> bool {
+        for character in self.password.chars() {
+            if character.is_uppercase() {
                 return true
             }
         }
@@ -134,10 +118,11 @@ impl PasswordHash for CreateUser
 {
     fn hash_password(&self) -> String
     {
+        dotenv::dotenv().ok();
         let mut hasher = Hasher::default();
         let hash = hasher
             .with_password(self.password.to_string())
-            .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
+            .with_secret_key(&std::env::var("SECRET_HASH").unwrap())
             .hash()
             .unwrap();
 

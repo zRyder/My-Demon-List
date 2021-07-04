@@ -4,6 +4,8 @@ use crate::
     model::geometry_dash::gd
 };
 
+use std::num::ParseIntError;
+
 #[derive(FromForm)]
 pub struct RatingForm
 {
@@ -28,34 +30,8 @@ pub struct RateInfo
     pub(super) rate: u8,
 }
 
-impl RatingForm
+pub(crate) fn generate_rating_id() -> u32
 {
-    pub(crate) fn level_exists(&self) -> bool
-    {
-        let maybe_level_stream = gd::prepare_search_request(self.level_id.to_string().as_str(), 1);
-
-        match maybe_level_stream
-        {
-            Ok(level_stream) =>
-            {
-                let maybe_level = gd::process_levels21_response(level_stream.as_str());
-
-                match maybe_level
-                {
-                    Ok(level) =>
-                    {
-                        true
-                    }
-                    Err(e) =>
-                    {
-                        false
-                    }
-                }
-            }
-            Err(e) =>
-            {
-                false
-            }
-        }
-    }
+    let range: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    nanoid::nanoid!(9, &range).parse::<u32>().unwrap()
 }

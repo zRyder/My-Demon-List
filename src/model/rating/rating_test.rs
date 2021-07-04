@@ -1,6 +1,9 @@
 pub mod tests
 {
-    use crate::model::rating::rate::{RateInfo, RatingForm};
+    use crate::model::{
+        rating::rate::{RateInfo, RatingForm},
+        geometry_dash::gd,
+    };
 
     #[test]
     pub async fn valid_level_test()
@@ -17,7 +20,7 @@ pub mod tests
             level_id: 1000000000
         };
 
-        assert_eq!(true, rate_form_1.level_exists());
-        assert_eq!(false, rate_form_2.level_exists());
+        assert_eq!(true, gd::level_exists(&rate_form_1.level_id));
+        assert_eq!(false, gd::level_exists(&rate_form_2.level_id));
     }
 }

@@ -1,15 +1,12 @@
 pub mod tests
 {
-    use std::error::Error;
     use crate::model::users::{
         user,
         user::PasswordHash};
 
     #[test]
-    pub async fn pass()
-    {
-        let test = crate::model::users::user::CreateUser
-        {
+    pub async fn pass() {
+        let test = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom703!".to_string(),
@@ -19,42 +16,36 @@ pub mod tests
     }
 
     #[test]
-    pub async fn session_id_test()
-    {
+    pub async fn session_id_test() {
         let id = crate::model::users::session::generate_session_id();
 
         println!("{}", id);
     }
 
     #[test]
-    pub async fn valid_password_test()
-    {
-        let test = crate::model::users::user::CreateUser
-        {
+    pub async fn valid_password_test() {
+        let test = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom703@".to_string(),
         };
         assert_eq!(true, test.is_valid_password());
 
-        let test2 = crate::model::users::user::CreateUser
-        {
+        let test2 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Ki!3".to_string(),
         };
         assert_eq!(false, test2.is_valid_password());
 
-        let test3 = crate::model::users::user::CreateUser
-        {
+        let test3 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom703".to_string(),
         };
         assert_eq!(false, test3.is_valid_password());
 
-        let test4 = crate::model::users::user::CreateUser
-        {
+        let test4 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom@".to_string(),
@@ -65,32 +56,28 @@ pub mod tests
     #[test]
     pub async fn valid_email_test()
     {
-        let test = crate::model::users::user::CreateUser
-        {
+        let test = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "something@domain.com".to_string(),
             password: "".to_string(),
         };
         assert_eq!(true, test.is_valid_email());
 
-        let test2 = crate::model::users::user::CreateUser
-        {
+        let test2 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "somethingatdomain.com".to_string(),
             password: "".to_string(),
         };
         assert_eq!(false, test2.is_valid_email());
 
-        let test3 = crate::model::users::user::CreateUser
-        {
+        let test3 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "@domain.com".to_string(),
             password: "".to_string(),
         };
         assert_eq!(false, test3.is_valid_email());
 
-        let test4 = user::CreateUser
-        {
+        let test4 = user::CreateUser {
             user_name: "Test".to_string(),
             email: "something@domain.co.uk".to_string(),
             password: "".to_string(),
@@ -99,30 +86,23 @@ pub mod tests
     }
 
     #[test]
-    pub async fn generate_user_id_test()
-    {
-        match user::generate_user_id()
-        {
-            Ok(user_id) =>
-                {
-                    println!("{}", user_id)
-                },
-            Err(e) =>
-                {
-                    println!("{}", e.to_string())
-                }
+    pub async fn generate_user_id_test() {
+        match user::generate_user_id() {
+            Ok(user_id) => {
+                println!("{}", user_id)
+            },
+            Err(e) => {
+                println!("{}", e.to_string())
+            }
         }
 
-        match user::generate_user_id()
-        {
-            Ok(user_id) =>
-                {
-                    println!("{}", user_id)
-                },
-            Err(e) =>
-                {
-                    println!("{}", e.to_string())
-                }
+        match user::generate_user_id() {
+            Ok(user_id) => {
+                println!("{}", user_id)
+            },
+            Err(e) => {
+                println!("{}", e.to_string())
+            }
         }
     }
 }

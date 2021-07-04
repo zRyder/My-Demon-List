@@ -7,10 +7,16 @@ use rocket_contrib::json::Json;
 
 pub fn database_error(e: Error) -> ApiResponse
 {
+    let mut error_code = Status::InternalServerError;
+
+    if e.to_string().contains("Duplicate entry") {
+        error_code = Status::Conflict
+    }
+
     ApiResponse
     {
         json: Json(e.to_string()),
-        status: Status::InternalServerError,
+        status: error_code,
     }
 }
 

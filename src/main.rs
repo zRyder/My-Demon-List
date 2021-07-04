@@ -3,19 +3,16 @@
 
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate futures;
 #[macro_use] extern crate tokio;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
-
+#[macro_use] extern crate dotenv;
 embed_migrations!();
 
-use std::error::Error;
+use std::env;
 
-use futures::executor::block_on;
 use rocket_contrib::databases::diesel as rocket_diesel;
 use rocket_contrib::serve::StaticFiles;
-use tokio::runtime::Runtime;
 
 use model::{
     geometry_dash,
@@ -30,16 +27,17 @@ pub mod schema;
 #[database("mysql_db")]
 pub struct DbConnection(rocket_diesel::mysql::MysqlConnection);
 
-fn main()
-{
-    let connection = diesel::mysql::MysqlConnection::establish("mysql://root:testdbserver@127.0.0.1:3306/my_demon_list_schema").unwrap();
+fn main() {
+    dotenv::dotenv().ok();
+
+    let connection = diesel::mysql::MysqlConnection::establish(&env::var("DATABASE_URL").unwrap()).unwrap();
     embedded_migrations::run_with_output(&connection, &mut std::io::stdout());
 
     rocket::ignite()
         .mount("/",StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static/")))
         .mount("/api/gd", routes![geometry_dash::routes::search])
-        .mount("/api/users", routes![users::routes::create_user, users::routes::login_user])
-        .mount("/api/rating", routes![rating::routes::rate_level])
+        .mount("/api/users", routes![users::routes::create_user, users::routes::login_user, users::routes::update_username])
+        .mount("/api/rating", routes![rating::routes::rate_level, rating::routes::get_level_rating])
         .attach(DbConnection::fairing())
         .launch();
 }

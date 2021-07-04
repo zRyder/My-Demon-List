@@ -1,13 +1,15 @@
-use argonautica::{Hasher, Verifier};
+extern crate chrono;
+
+use argonautica::Verifier;
+use dotenv;
 use crate::schema::user_hash;
-use std::convert::Infallible;
+use std::env;
 
 ///Struct representing existing user. This should be used strictly to authenticate a user.
 
 #[table_name = "user_hash"]
 #[derive(Insertable)]
-pub struct AuthInfo
-{
+pub struct AuthInfo {
     #[column_name = "userId"]
     pub(super) user_id: u32,
 
@@ -16,10 +18,8 @@ pub struct AuthInfo
 }
 
 ///Struct representing a representing user logging in. This will be used as user provided data to authenticate and preform authorized actions
-//Will derive FromForm
 #[derive(FromForm)]
-pub struct LoginUser
-{
+pub struct LoginUser {
     ///The username of the user who is attempting to login
     pub(super) user_name: String,
 
@@ -27,62 +27,62 @@ pub struct LoginUser
     pub(super) password: String
 }
 
-impl Default for AuthInfo
-{
-    fn default() -> Self
-    {
-        AuthInfo
-        {
+impl Default for AuthInfo {
+    fn default() -> Self {
+        AuthInfo {
             user_id: 0,
             password_hash: "".to_string(),
         }
     }
 }
 
-impl LoginUser
-{
-    pub(super) fn verify_password_hash(&self, hash: &String) -> Result<bool, argonautica::Error>
-    {
+impl LoginUser {
+    pub(super) fn verify_password_hash(&self, hash: &String) -> Result<bool, argonautica::Error> {
+        dotenv::dotenv().ok();
 
         //TO VERIFY PASSWORDS
         let mut verifier = Verifier::default();
         let is_valid = verifier
             .with_hash(hash)
             .with_password(&self.password)
-            .with_secret_key("cQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgVkXp2s5v8y/B?E(H+MbQeThWmZq3t6w9z$C&F)J@NcRfUjXn2r5u7x!A%D*G-KaPdSgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-KaPdSgVkYp3s6v9y$B&E)H@MbQeThWmZq4t")
+            .with_secret_key(&std::env::var("SECRET_HASH").unwrap())
             .verify();
 
         is_valid
     }
 }
 
-pub(crate) fn is_valid_session(session_id: &str, dbconn: crate::DbConnection) -> bool
-{
-    use diesel::{ExpressionMethods, prelude::*, QueryDsl, RunQueryDsl};
-    use crate::schema::user_sessions::dsl::*;
+pub(crate) fn is_valid_session(session_id: &str, db_conn: &crate::DbConnection) -> Option<u32> {
+    use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+    use crate::schema::user_sessions::dsl::{
+        user_sessions,
+        userId,
+        expire,
+        sessionId,
+    };
 
-    let session_result = user_sessions.select(userId).filter(sessionId.eq(session_id)).load::<u32>(&dbconn.0);
+    let session_result = user_sessions.select((userId, expire)).filter(sessionId.eq(session_id)).load::<(u32, chrono::NaiveDateTime)>(&db_conn.0);
 
-    match session_result
-    {
-        Ok(maybe_session) =>
-        {
-            match maybe_session.first()
-            {
-                Some(_session) =>
-                {
-                    true
+    match session_result {
+        Ok(maybe_session) => {
+            match maybe_session.first() {
+                Some(user_session_info) => {
+                    if chrono::Local::now().naive_utc() <= user_session_info.1{
+                        print!("Working");
+                        Some(user_session_info.0)
+                    }
+                    else {
+                        print!("Session expired");
+                        None
+                    }
                 }
-                None =>
-                {
-                    false
+                None => {
+                    None
                 }
             }
         }
-        Err(_e) =>
-        {
-            false
+        Err(_e) => {
+            None
         }
     }
-
 }

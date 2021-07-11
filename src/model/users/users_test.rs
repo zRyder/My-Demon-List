@@ -29,28 +29,28 @@ pub mod tests
             email: "".to_string(),
             password: "Kingdom703@".to_string(),
         };
-        assert_eq!(true, test.is_valid_password());
+        assert_eq!(true, user::is_valid_password(&test.password));
 
         let test2 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Ki!3".to_string(),
         };
-        assert_eq!(false, test2.is_valid_password());
+        assert_eq!(false, user::is_valid_password(&test2.password));
 
         let test3 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom703".to_string(),
         };
-        assert_eq!(false, test3.is_valid_password());
+        assert_eq!(false, user::is_valid_password(&test3.password));
 
         let test4 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "".to_string(),
             password: "Kingdom@".to_string(),
         };
-        assert_eq!(false, test4.is_valid_password());
+        assert_eq!(false, user::is_valid_password(&test4.password));
     }
 
     #[test]
@@ -61,28 +61,28 @@ pub mod tests
             email: "something@domain.com".to_string(),
             password: "".to_string(),
         };
-        assert_eq!(true, test.is_valid_email());
+        assert_eq!(true, user::is_valid_email(&test.email));
 
         let test2 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "somethingatdomain.com".to_string(),
             password: "".to_string(),
         };
-        assert_eq!(false, test2.is_valid_email());
+        assert_eq!(false, user::is_valid_email(&test2.email));
 
         let test3 = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
             email: "@domain.com".to_string(),
             password: "".to_string(),
         };
-        assert_eq!(false, test3.is_valid_email());
+        assert_eq!(false, user::is_valid_email(&test3.email));
 
         let test4 = user::CreateUser {
             user_name: "Test".to_string(),
             email: "something@domain.co.uk".to_string(),
             password: "".to_string(),
         };
-        assert_eq!(true, test4.is_valid_email());
+        assert_eq!(true, user::is_valid_email(&test4.email));
     }
 
     #[test]

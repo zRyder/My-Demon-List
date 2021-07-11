@@ -23,15 +23,18 @@ use chrono::{
     Duration,
     prelude,
 };
+use std::net::SocketAddr;
 
 #[post("/create", format="form", data="<create_info>")]
-pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateUser>) -> ApiResponse {
+pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateUser>, remote_addr: SocketAddr) -> ApiResponse {
     use crate::schema;
     use crate::schema::users::dsl::{
         users,
         userId,
         userName,
     };
+
+    info!("Incoming Request from originating from {:?}", &remote_addr);
 
     /*
     1) Check is Username is valid DONE
@@ -46,7 +49,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     let mut db_user_entry = user::DBUser::default();
     let mut auth_info_entry = auth::AuthInfo::default();
 
-    if create_info.is_valid_username() {
+    if user::is_valid_username(&create_info.user_name) {
         db_user_entry.user_name = create_info.user_name.clone();
     }
     else {
@@ -56,8 +59,8 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
         }
     }
 
-    if create_info.is_valid_password() {
-        auth_info_entry.password_hash = create_info.hash_password();;
+    if user::is_valid_password(&create_info.password) {
+        auth_info_entry.password_hash = user::hash_password(&create_info.password);;
     }
     else {
         return ApiResponse {
@@ -66,7 +69,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
         }
     }
 
-    if create_info.is_valid_email() {
+    if user::is_valid_email(&create_info.password) {
         db_user_entry.email = create_info.email.clone();
     }
     else {
@@ -161,8 +164,8 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
         Ok(user_result) => {
             match user_result.first() {
                 Some(userid) => {
-                    match login_info.verify_password_hash(&user_hash.select(passwordHash).filter(auth_userId.eq(userid))
-                        .load::<String>(&*db_conn).unwrap().first().unwrap()) {
+                    match auth::verify_password_hash(&user_hash.select(passwordHash).filter(auth_userId.eq(userid))
+                        .load::<String>(&*db_conn).unwrap().first().unwrap(), &login_info.password) {
                         Ok(is_authenticated) => {
                             if is_authenticated {
                                 let session_id = session::generate_session_id();
@@ -246,6 +249,79 @@ pub fn update_username(db_conn: crate::DbConnection, new_username: Form<user::Up
                         }
                         Err(e) => {
                             api_response::database_error(e)
+                        }
+                    }
+                }
+                None => {
+                    ApiResponse {
+                        json: Json("User is not logged in, session expired or does not exist".to_string()),
+                        status: Status::Unauthorized
+                    }
+                }
+            }
+        }
+        None => {
+            ApiResponse{
+                json: Json("user is not logged in".to_string()),
+                status: Status::Unauthorized
+            }
+        }
+    }
+}
+
+#[patch("/update/password", format="form", data="<new_password>")]
+pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::UpdatePassword>, mut cookies: Cookies) -> ApiResponse {
+    use crate::schema::{
+        user_hash::dsl::{
+            user_hash,
+            passwordHash,
+            userId
+        },
+    };
+
+    if !user::is_valid_password(&new_password.new_password)
+    {
+        return ApiResponse {
+            json: Json("New password is invalid".to_string()),
+            status: Status::BadRequest
+        }
+    }
+
+    match cookies.get_private("session") {
+        Some(session_id_cookie) => {
+            match auth::is_valid_session(session_id_cookie.value(), &db_conn) {
+                Some(user_id) => {
+                    match auth::verify_password_hash(&user_hash.select(passwordHash)
+                        .filter(userId.eq(user_id))
+                        .load::<String>(&*db_conn).unwrap().first().unwrap(),&new_password.current_password) {
+                        Ok(is_authenticated) => {
+                            if is_authenticated {
+                                match diesel::update(user_hash.filter(userId.eq(&user_id)))
+                                    .set(passwordHash.eq(&user::hash_password(&new_password.new_password)))
+                                    .execute(&db_conn.0) {
+                                    Ok(_result) => {
+                                        ApiResponse {
+                                            json: Json("Password updated successfully".to_string()),
+                                            status: Status::Ok
+                                        }
+                                    }
+                                    Err(e) => {
+                                        api_response::database_error(e)
+                                    }
+                                }
+                            }
+                            else {
+                                ApiResponse {
+                                    json: Json("current password is incorrect".to_string()),
+                                    status: Status::Forbidden
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            ApiResponse {
+                                json: Json(e.to_string()),
+                                status: Status::InternalServerError
+                            }
                         }
                     }
                 }

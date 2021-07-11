@@ -36,21 +36,20 @@ impl Default for AuthInfo {
     }
 }
 
-impl LoginUser {
-    pub(super) fn verify_password_hash(&self, hash: &String) -> Result<bool, argonautica::Error> {
-        dotenv::dotenv().ok();
+pub(super) fn verify_password_hash(password_hash: &String, password: &String) -> Result<bool, argonautica::Error> {
+    dotenv::dotenv().ok();
 
-        //TO VERIFY PASSWORDS
-        let mut verifier = Verifier::default();
-        let is_valid = verifier
-            .with_hash(hash)
-            .with_password(&self.password)
-            .with_secret_key(&std::env::var("SECRET_HASH").unwrap())
-            .verify();
+    //TO VERIFY PASSWORDS
+    let mut verifier = Verifier::default();
+    let is_valid = verifier
+        .with_hash(password_hash)
+        .with_password(password)
+        .with_secret_key(&std::env::var("SECRET_HASH").unwrap())
+        .verify();
 
-        is_valid
-    }
+    is_valid
 }
+
 
 pub(crate) fn is_valid_session(session_id: &str, db_conn: &crate::DbConnection) -> Option<u32> {
     use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};

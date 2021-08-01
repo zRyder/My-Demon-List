@@ -3,13 +3,13 @@ extern crate argonautica;
 extern crate regex;
 extern crate nanoid;
 
+use std::env;
 use std::num::ParseIntError;
 
 use argonautica::Hasher;
+use dotenv;
 use regex::Regex;
 use serde::Serialize;
-use dotenv;
-use std::env;
 
 use crate::schema::users;
 
@@ -156,10 +156,4 @@ impl Default for DBUser
             email: "".to_string()
         }
     }
-}
-
-pub(crate) fn generate_user_id() -> Result<u32, ParseIntError>
-{
-    let range: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    nanoid::nanoid!(9, &range).parse::<u32>()
 }

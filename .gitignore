@@ -1,0 +1,11 @@
+/migrations
+/logs
+/.idea
+schema*
+.env
+cargo.lock
+diesel.toml
+Rocket.toml
+/target
+.DS_Store
+**/.DS_Store

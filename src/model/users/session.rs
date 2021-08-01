@@ -1,11 +1,12 @@
 extern crate chrono;
 
-use crate::schema::user_sessions;
 use chrono::{
-    Utc,
     Duration,
     prelude,
+    Utc,
 };
+
+use crate::schema::user_sessions;
 
 #[table_name = "user_sessions"]
 #[derive(Insertable)]
@@ -28,8 +29,4 @@ impl Default for SessionInfo {
             expire_date: (Utc::now() + Duration::days(1)).naive_utc(),
         }
     }
-}
-
-pub(super) fn generate_session_id() -> String {
-    nanoid::nanoid!(128).parse::<String>().unwrap()
 }

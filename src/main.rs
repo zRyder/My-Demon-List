@@ -26,15 +26,29 @@ use model::{
 use diesel::Connection;
 
 use log::{debug, error, info, trace, warn, LevelFilter};
-use log4rs::append::file::FileAppender;
-use log4rs::encode::pattern::PatternEncoder;
-use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
-use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
-use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
-use log4rs::Config;
-use log4rs::config::{Appender, Root};
-use log4rs::filter::threshold::ThresholdFilter;
-use log4rs::append::rolling_file::RollingFileAppender;
+
+use log4rs::{
+    append::{
+        file::FileAppender,
+        rolling_file::{
+            policy::compound::{
+                roll::fixed_window::FixedWindowRoller,
+                trigger::size::SizeTrigger,
+                CompoundPolicy,
+            },
+            RollingFileAppender
+        }
+    },
+    config::{
+        Appender,
+        Root
+
+    },
+    filter::threshold::ThresholdFilter,
+    Config,
+    encode::pattern::PatternEncoder
+};
+use rocket::fairing::AdHoc;
 
 pub mod model;
 pub mod schema;
@@ -81,5 +95,8 @@ fn main() {
         .mount("/api/users", routes![users::routes::create_user, users::routes::login_user, users::routes::update_username, users::routes::update_password])
         .mount("/api/rating", routes![rating::routes::rate_level, rating::routes::get_level_rating])
         .attach(DbConnection::fairing())
+        .attach(AdHoc::on_request("Log requests", |req, _|{
+            info!("request recieved: {:?}", req);
+        }))
         .launch();
 }

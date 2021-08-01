@@ -1,5 +1,12 @@
 extern crate chrono;
 
+use std::net::SocketAddr;
+
+use chrono::{
+    Duration,
+    prelude,
+    Utc,
+};
 use diesel::{ExpressionMethods, prelude::*, QueryDsl, RunQueryDsl};
 use rocket::http::{Cookie, Status};
 use rocket::http::Cookies;
@@ -10,31 +17,24 @@ use crate::model::{
     api_response,
     api_response::ApiResponse,
     users::{
-        user,
-        user::PasswordHash,
         auth,
-        session
+        session,
+        user,
+        user::PasswordHash
     },
 
 };
 
-use chrono::{
-    Utc,
-    Duration,
-    prelude,
-};
-use std::net::SocketAddr;
-
 #[post("/create", format="form", data="<create_info>")]
-pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateUser>, remote_addr: SocketAddr) -> ApiResponse {
-    use crate::schema;
+pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateUser>, ) -> ApiResponse {
+    info!("initiating create_user on incoming request");
+
+    use crate::{schema, model};
     use crate::schema::users::dsl::{
         users,
         userId,
         userName,
     };
-
-    info!("Incoming Request from originating from {:?}", &remote_addr);
 
     /*
     1) Check is Username is valid DONE
@@ -50,9 +50,11 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     let mut auth_info_entry = auth::AuthInfo::default();
 
     if user::is_valid_username(&create_info.user_name) {
+        info!("username {:?} ok", &create_info.user_name);
         db_user_entry.user_name = create_info.user_name.clone();
     }
     else {
+        error!("invalid username {:?}", &create_info.user_name);
         return ApiResponse {
             json: Json("invalid username".to_string()),
             status: Status::BadRequest,
@@ -60,63 +62,62 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     }
 
     if user::is_valid_password(&create_info.password) {
+        info!("password ok");
         auth_info_entry.password_hash = user::hash_password(&create_info.password);;
     }
     else {
+        error!("malformed password");
         return ApiResponse {
-            json: Json("invalid password".to_string()),
+            json: Json("malformed password".to_string()),
             status: Status::BadRequest,
         }
     }
 
-    if user::is_valid_email(&create_info.password) {
+    if user::is_valid_email(&create_info.email) {
+        info!("email_address {:?} ok", &create_info.email);
         db_user_entry.email = create_info.email.clone();
     }
     else {
+        error!("invalid email_address {:?}", &create_info.email);
         return ApiResponse {
             json: Json("invalid email address".to_string()),
             status: Status::BadRequest,
         }
     }
 
-    match user::generate_user_id() {
-        Ok(user_id) => {
-            match users.select(userId)
-                .filter(userId.eq(&user_id))
-                .load::<u32>(&db_conn.0) {
-                Ok(user_id_result) => {
-                    if user_id_result.len() == 0 {
-                        db_user_entry.user_id = user_id;
-                        auth_info_entry.user_id = user_id;
-                    }
-                }
-                Err(e) => {
-                    return api_response::database_error(e)
+    let user_id =super::super::generate_numeric_id(9);
+    info!("generating user_id value = {:?}", &user_id);
+        match users.select(userId)
+            .filter(userId.eq(&user_id))
+            .load::<u32>(&db_conn.0) {
+            Ok(user_id_result) => {
+                if user_id_result.len() == 0 {
+                    info!("user id {:?} is free", &user_id);
+                    db_user_entry.user_id = user_id;
+                    auth_info_entry.user_id = user_id;
                 }
             }
-        }
-        Err(e) => {
-            return ApiResponse {
-                json: Json(e.to_string()),
-                status: Status::InternalServerError,
+            Err(e) => {
+                return api_response::database_error(e)
             }
         }
-    }
 
     return match diesel::insert_into(schema::users::table)
-        .values(db_user_entry)
+        .values(&db_user_entry)
         .execute(&db_conn.0) {
         Ok(_insert_user_check) => {
             match diesel::insert_into(schema::user_hash::table)
                 .values(auth_info_entry)
                 .execute(&db_conn.0) {
                 Ok(_insert_auth_flag) => {
+                    info!("User successfully created with user_id = {:?}, user_name = {:?}, email_address = {:?}", &db_user_entry.user_id, &create_info.user_name, &create_info.email);
                     ApiResponse {
                         json: Json("message: user added successfully".to_string()),
                         status: Status::Ok,
                     }
                 }
                 Err(e) => {
+                    error!("unable to insert new user_hash record, removing from users table");
                     diesel::delete(schema::users::table
                         .filter(userName.eq(&create_info.user_name)))
                         .execute(&db_conn.0);
@@ -147,6 +148,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
             user_sessions
         }
     };
+    use crate::model;
     /*
         1) Check if a user with the given username exists
         2) Grab the password hash from the DB and call an authenticate function
@@ -168,7 +170,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
                         .load::<String>(&*db_conn).unwrap().first().unwrap(), &login_info.password) {
                         Ok(is_authenticated) => {
                             if is_authenticated {
-                                let session_id = session::generate_session_id();
+                                let session_id = super::super::generate_id(128);
                                 let user_cookie: Cookie;
                                 let session_info = session::SessionInfo {
                                     user_id: *userid,
@@ -340,4 +342,9 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
             }
         }
     }
+}
+
+#[post("/verify_account/<verification_id>")]
+pub fn verify_user(db_conn: crate::DbConnection) -> ApiResponse {
+
 }

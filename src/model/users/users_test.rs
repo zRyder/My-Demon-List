@@ -1,6 +1,8 @@
 pub mod tests
 {
+    use crate::model;
     use crate::model::users::{
+        email,
         user,
         user::PasswordHash};
 
@@ -17,7 +19,7 @@ pub mod tests
 
     #[test]
     pub async fn session_id_test() {
-        let id = crate::model::users::session::generate_session_id();
+        let id = super::super::super::generate_id(128);
 
         println!("{}", id);
     }
@@ -87,22 +89,15 @@ pub mod tests
 
     #[test]
     pub async fn generate_user_id_test() {
-        match user::generate_user_id() {
-            Ok(user_id) => {
-                println!("{}", user_id)
-            },
-            Err(e) => {
-                println!("{}", e.to_string())
-            }
-        }
+        let mut user_id = super::super::super::generate_numeric_id(9) ;
+        println!("{}", user_id);
 
-        match user::generate_user_id() {
-            Ok(user_id) => {
-                println!("{}", user_id)
-            },
-            Err(e) => {
-                println!("{}", e.to_string())
-            }
-        }
+        user_id = super::super::super::generate_numeric_id(9);
+        println!("{}", user_id);
+    }
+
+    #[test]
+    pub async fn test_email() {
+        // email::send_verification_email(crate::DbConnection::, 421280988);
     }
 }

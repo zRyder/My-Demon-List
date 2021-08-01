@@ -57,7 +57,7 @@ pub fn rate_level(db_conn: crate::DbConnection, rate_form: Form<rate::RatingForm
                             else {
                                 let new_rating = rate::RateInfo {
                                     user_id,
-                                    rating_id: rate::generate_rating_id(),
+                                    rating_id: super::super::generate_numeric_id(9),
                                     level_id: rate_form.level_id.clone(),
                                     rate: rate_form.rating.clone()
                                 };

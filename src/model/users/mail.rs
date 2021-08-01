@@ -31,7 +31,7 @@ impl VerificationInfo {
     }
 }
 
-pub(crate) fn send_verification_email(db_conn: &crate::DbConnection, account_id: u32) -> Option<Result<Response, Error>> {
+pub(crate) fn send_verification_email(db_conn: &crate::DbConnection, account_id: &u32, email_address: &String) -> Option<Result<Response, Error>> {
     use crate::schema::{
         users::dsl::{
             users,
@@ -46,12 +46,12 @@ pub(crate) fn send_verification_email(db_conn: &crate::DbConnection, account_id:
         },
     };
 
-    info!("loading dotenv for email.rs");
+    info!("loading dotenv for mail");
     dotenv::dotenv().ok();
 
     info!("generating verification_info");
     let verification_id = super::super::generate_id(64);
-    let verification_info = VerificationInfo::new(&account_id, &verification_id, &(Utc::now() + Duration::days(1)).naive_utc());
+    let verification_info = VerificationInfo::new(account_id, &verification_id, &(Utc::now() + Duration::days(1)).naive_utc());
 
     info!("verification_info generated");
     match diesel::replace_into(user_verification).values(verification_info).execute(&db_conn.0) {
@@ -60,9 +60,9 @@ pub(crate) fn send_verification_email(db_conn: &crate::DbConnection, account_id:
             info!("verification_info inserted into database");
             let email = Message::builder()
                 .from(std::env::var("MY_DEMON_LIST_NO_REPLY_EMAIL").unwrap().parse().unwrap())
-                .to("kingdomhearts7673@gmail.com".parse().unwrap())
+                .to(email_address.parse().unwrap())
                 .subject("Verify Your Account - MyDemonList")
-                .body(format!("Click link to verify: https://www.mydemonlist.com/verify/{}", &verification_id))
+                .body(format!("Click link to verify: {}/verify_account?verification_id={}", std::env::var("WEBSITE_BASE_URL").unwrap(), &verification_id))
                 .unwrap();
 
             info!("authenticating into SMTP server");
@@ -78,7 +78,7 @@ pub(crate) fn send_verification_email(db_conn: &crate::DbConnection, account_id:
             Some(mailer.send(&email))
         }
         Err(e) => {
-            error!("Database error: {}", e);
+            error!("database error with message: {}", e);
             None
         }
     }

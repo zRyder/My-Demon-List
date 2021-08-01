@@ -2,6 +2,7 @@ extern crate serde;
 extern crate argonautica;
 extern crate regex;
 extern crate nanoid;
+extern crate chrono;
 
 use std::env;
 use std::num::ParseIntError;
@@ -12,6 +13,7 @@ use regex::Regex;
 use serde::Serialize;
 
 use crate::schema::users;
+use self::chrono::Utc;
 
 ///Struct that is utilized to create new users. Post requests made to the /create/user endpoint. Data here will come from the create account form
 #[derive(FromForm)]
@@ -28,7 +30,7 @@ pub struct CreateUser {
 
 //For inserting new users into the database
 #[table_name = "users"]
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 pub struct DBUser {
     #[column_name = "userId"]
     pub user_id: u32,
@@ -38,6 +40,12 @@ pub struct DBUser {
 
     #[column_name = "email"]
     pub email: String,
+
+    #[column_name = "isVerified"]
+    pub is_verified: bool,
+
+    #[column_name = "created"]
+    pub(super) created: chrono::NaiveDateTime
 }
 
 #[derive(FromForm)]
@@ -153,7 +161,9 @@ impl Default for DBUser
         {
             user_id: 0,
             user_name: "".to_string(),
-            email: "".to_string()
+            email: "".to_string(),
+            is_verified: false,
+            created: Utc::now().naive_utc()
         }
     }
 }

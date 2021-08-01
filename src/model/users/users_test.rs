@@ -2,7 +2,7 @@ pub mod tests
 {
     use crate::model;
     use crate::model::users::{
-        email,
+        mail,
         user,
         user::PasswordHash};
 

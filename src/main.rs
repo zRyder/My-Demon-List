@@ -92,7 +92,7 @@ fn main() {
     rocket::ignite()
         .mount("/",StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static/")))
         .mount("/api/gd", routes![geometry_dash::routes::search])
-        .mount("/api/users", routes![users::routes::create_user, users::routes::login_user, users::routes::update_username, users::routes::update_password])
+        .mount("/api/users", routes![users::routes::create_user, users::routes::login_user, users::routes::update_username, users::routes::update_password, users::routes::verify_user])
         .mount("/api/rating", routes![rating::routes::rate_level, rating::routes::get_level_rating])
         .attach(DbConnection::fairing())
         .attach(AdHoc::on_request("Log requests", |req, _|{

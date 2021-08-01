@@ -8,7 +8,7 @@ use chrono::{
     Utc,
 };
 use diesel::{ExpressionMethods, prelude::*, QueryDsl, RunQueryDsl};
-use rocket::http::{Cookie, Status};
+use rocket::http::{Cookie, Status, RawStr};
 use rocket::http::Cookies;
 use rocket::request::Form;
 use rocket_contrib::json::Json;
@@ -20,7 +20,8 @@ use crate::model::{
         auth,
         session,
         user,
-        user::PasswordHash
+        user::PasswordHash,
+        mail,
     },
 
 };
@@ -110,7 +111,9 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
                 .values(auth_info_entry)
                 .execute(&db_conn.0) {
                 Ok(_insert_auth_flag) => {
-                    info!("User successfully created with user_id = {:?}, user_name = {:?}, email_address = {:?}", &db_user_entry.user_id, &create_info.user_name, &create_info.email);
+                    info!("User successfully created with info {:?}", &db_user_entry);
+                    info!("initiating new account verification setup");
+                    mail::send_verification_email(&db_conn, &db_user_entry.user_id, &db_user_entry.email);
                     ApiResponse {
                         json: Json("message: user added successfully".to_string()),
                         status: Status::Ok,
@@ -344,7 +347,66 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
     }
 }
 
-#[post("/verify_account/<verification_id>")]
-pub fn verify_user(db_conn: crate::DbConnection) -> ApiResponse {
+#[post("/verify_account?<verification_id>")]
+pub fn verify_user(db_conn: crate::DbConnection, verification_id: &RawStr) -> ApiResponse {
+    use crate::schema::{
+        user_verification::dsl::{
+            user_verification,
+            userId,
+            expire,
+            verificationCode,
+        },
 
+        users::dsl::{
+            users,
+            userId as users_userId,
+            isVerified
+
+        }
+    };
+
+    info!("initiating user verification {}", verification_id.as_str());
+    match user_verification.select((userId, verificationCode, expire))
+        .filter(verificationCode.eq(verification_id.as_str()))
+        .load::<(u32, String, chrono::NaiveDateTime)>(&*db_conn.0) {
+        Ok(user_to_verify) => {
+            match user_to_verify.first() {
+                Some(verify_user) => {
+                    info!("found user with info {:?}", verify_user);
+
+                    if Utc::now().naive_utc() > verify_user.2 {
+                        warn!("verification code {:?} has expired for user {:?}", &verification_id.as_str(), &verify_user);
+                        return ApiResponse {
+                            json: Json("{message: verification code has expired}".to_string()),
+                            status: Status::Conflict
+                        }
+                    }
+                    match diesel::update(users.filter(users_userId.eq(verify_user.0)))
+                        .set(isVerified.eq(true))
+                        .execute(&db_conn.0) {
+                        Ok(_update_check) => {
+                            info!("user with info {:?} verified", verify_user);
+                            ApiResponse{
+                                json: Json("{message: user successfully verified}".to_string()),
+                                status: Status::Ok
+                            }
+                        }
+                        Err(e) => {
+                            api_response::database_error(e)
+                        }
+                    }
+                }
+                None => {
+                    warn!("verification code could not be found");
+                    ApiResponse{
+                        json: Json("{message: no user with given verification code}".to_string()),
+                        status: Status::NotFound
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            api_response::database_error(e)
+        }
+    }
 }

@@ -1,0 +1,18 @@
+@charset "UTF-8";
+
+.user_buttons{
+    width: 80px;
+    height: 30px;
+    border: none;
+    font-family: Verdana, Montserrat, Arial;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 14px;
+    background-color: #FFFFFF;
+}
+
+.user_buttons:hover{
+    filter: opacity(75%);
+    text-decoration: underline;
+    cursor: pointer;
+}

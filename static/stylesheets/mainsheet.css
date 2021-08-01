@@ -9,10 +9,24 @@
 
 #header
 {
-	height: 170px;
+	height: auto;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+}
+
+.upper_header{
+	display: flex;
+	justify-content: space-between;
+}
+
+.user_block {
+	float: right;
+	width: 300px;
+	padding: 0px 20px 0px 20px;
+	display: flex;
+	justify-content: space-evenly;
+	align-items: center;
 }
 
 #navbar
@@ -35,8 +49,12 @@
 .nav_elements
 {
 	font-family: Verdana, Montserrat, Arial;
+	
 	font-weight: bold;
-	font-size: 20px;
+	font-size: 18px;
+	text-decoration: none;
+	width: auto;
+	padding: 0px 15px 0px 15px;
 	color: white;
 	display: flex;
 	align-items: center;
@@ -162,9 +180,8 @@
 	display: none;
 	flex-direction: column;
 	width: 100%;
-	height: 210px;
+	height: auto;
 	background-color:#1E4E85;
-	padding: 10px 0px;
 }
 
 .hamburger_elements
@@ -206,7 +223,7 @@
 	margin: 0 auto;
 	width: 960px;
 	height: auto;
-	background-color:#F6F6F6;
+	background-color: #f6f6f6;
 }
 
 .left_info_block
@@ -284,7 +301,7 @@
 	color: black;
 }
 
-@media (max-width: 960px)
+@media (max-width: 1110px)
 {
 	#nav_elements_container
 	{
@@ -296,7 +313,7 @@
 	}
 }
 
-@media (max-width: 961px)
+@media (max-width: 1111px)
 {
 	.hamburger_menu
 	{

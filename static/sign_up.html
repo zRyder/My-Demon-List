@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="stylesheets/mainsheet.css" rel="stylesheet">
+    <link href="stylesheets/button.css" rel="stylesheet">
+    <title>My Demon List - Home</title>
+</head>
+
+<body onResize="reset_hamburger()">
+<div id="header">
+    <div class="upper_header">
+        <div>
+            <img src = "images/mydemonlistlogo.png" alt="My Demon List" style="max-height: 60px; width: 220px; "onclick="location.href='index.html'">
+        </div>
+        <div class="user_block">
+            <button class="user_buttons" style="background-color: #4a87ce" onclick="location.href='log_in.html'">Log In</button>
+            <button class="user_buttons" style="background-color: #cd4242" onclick="location.href='sign_up.html'">Sign up</button>
+        </div>
+    </div>
+    <div id="navbar">
+
+        <!--NAVIIGATION SECTION-->
+        <nav id="nav_elements_container">
+            <a href="index.html" class="nav_elements">Home</a>
+            <a class="nav_elements">Top Rated Demons</a>
+            <a class="nav_elements">New Demons</a>
+            <a class="nav_elements">Users</a>
+            <a class="nav_elements">Support</a>
+        </nav>
+
+        <div class="hamburger_container" onClick="toggle_hamburger()">
+            <div class="hamburger_button"></div>
+        </div>
+
+        <!--SEARCH BAR SECTION-->
+        <div id = "searchbar_container">
+            <div style="display: flex; flex-wrap: nowrap">
+                <input id = "searchbar" placeholder="Search for a rated demon level...">
+                <button type ="button"><img src="images/search_icon.png" alt="Search" style="max-width: 20px; max-height: 20px;"></button>
+            </div>
+        </div>
+
+    </div>
+</div> <!---END OF HEADER--->
+<div class="hamburger_menu">
+    <div class="hamburger_elements">Home</div>
+    <div class="hamburger_elements">Top Rated Demons</div>
+    <div class="hamburger_elements">New Demons</div>
+    <div class="hamburger_elements">Contact</div>
+</div>
+<div id="container">
+    Sign up
+</div>
+</body>
+</html>

@@ -1,9 +1,9 @@
 
 function toggle_hamburger()
 {
-	var hamburgerMenu = document.getElementsByClassName("hamburger_menu")[0];
-	var hamburgerButton = document.querySelector(".hamburger_container");
-	
+	const hamburgerMenu = document.getElementsByClassName("hamburger_menu")[0];
+	const hamburgerButton = document.querySelector(".hamburger_container");
+
 	if(hamburgerMenu.style.display == "flex")
 	{
 		hamburgerButton.classList.remove('open');
@@ -18,12 +18,12 @@ function toggle_hamburger()
 
 function reset_hamburger()
 {
-	if(window.innerWidth >= 961)
+	if(window.innerWidth >= 1111)
 	{
-		var hamburgerButton = document.querySelector(".hamburger_container");
+		const hamburgerButton = document.querySelector(".hamburger_container");
 		hamburgerButton.classList.remove('open');
 
-		var hamburgerMenu = document.getElementsByClassName("hamburger_menu")[0];
+		const hamburgerMenu = document.getElementsByClassName("hamburger_menu")[0];
 		hamburgerMenu.style.display = "none";
 	}
 }

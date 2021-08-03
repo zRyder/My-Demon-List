@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+.signup_form_container {
+    width: 60%;
+    max-width: 720px;
+    height: auto;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 3% 5%;
+}
+
+.signup_form{
+    height: auto;
+    width: 50%;
+    max-width: 240px;
+    padding: 5% 15%;
+    display: flex;
+    flex-flow: column wrap;
+    border: 2px solid #6592c5;
+
+}
+
+.signup_form_label{
+    font-size: 14px;
+    padding: 0% 0% 2% 0%;
+}
+
+.signup_form_small_textbox {
+    width: 100%;
+    height: 25px;
+    margin-bottom: 10%;
+}
+
+@media (max-width: 640px) {
+    .signup_form_container{
+        width: 100%;
+    }
+}

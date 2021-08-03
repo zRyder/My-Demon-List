@@ -206,99 +206,42 @@
 
 /*END OF HEADER*/
 
+.text_font{
+	font-family: Verdana, Montserrat, Arial;
+	color: #000000;
+}
+
+.text_font_heading{
+	font-size: 20px;
+	font-weight: bold;
+	padding: 2% 0px 2% 0px;
+	text-align: center;
+}
+
+.text_font_light{
+	font-size: 14px;
+	font-weight: lighter;
+	color: #8f8f8f;
+	padding: 2% 0px 2% 0px;
+	text-align: center;
+}
+
+.text_font_lighter{
+	font-size: 12px;
+	font-weight: lighter;
+	color: #8f8f8f;
+	padding: 0px 0px 2% 0px;
+}
+
 #container
 {
 	margin: 0 auto;
-	padding: 10px 40px 10px 40px;
-	width: 60vw;
+	width: 100vw;
 	height: 100%;
-	background-color:#F6F6F6;
 	display: flex;
-	flex-flow: column nowrap;
-	justify-content: flex-start;
-	align-items: center;
-}
-#dynamic_container
-{
-	margin: 0 auto;
-	width: 960px;
-	height: auto;
-	background-color: #f6f6f6;
-}
-
-.left_info_block
-{
-	width: 100%;
-	height: auto;
-	margin: 10px 0px 10px 0px;
-	display: flex;
-	flex-flow: row wrap;
-	align-items: stretch;
-	justify-content: space-evenly;
-}
-
-.right_info_block
-{
-	width: 100%;
-	height: auto;
-	margin: 10px 0px 10px 0px;
-	display: flex;
-	flex-flow: row-reverse wrap;
-	align-items: stretch;
-	justify-content: space-evenly;
-}
-
-.stats_container
-{
-	background-color: #4a87ce;
-	width: 100%;
-	height: 40px;
-	padding: 10px 10px 10px 10px;
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: space-evenly;
-	align-items: center;
-}
-
-.info_text_container
-{
-	width: 75%;
-	padding: 20px 20px 20px 0px
-}
-.info_image_container
-{
-	width: 200px;
-}
-
-.header_text
-{
-	font-family: Verdana, Montserrat, Arial;
-	font-weight: bold;
-	font-size: 20px;
-	padding: 15px 0px 15px 0px;
-}
-
-.normal_text
-{
-	font-family: Verdana, Montserrat, Arial;
-	font-size: 18px;
-}
-
-.normal_button
-{
-	background-color: #cd4242;
-	transition: 0.3s;
-	cursor: pointer;
-	display: flex;
+	flex-flow: row nowrap;
 	justify-content: center;
 	align-items: center;
-	color: #FFFFFF;
-}
-
-.normal_button:hover
-{
-	background-color:#EE8181;
-	color: black;
 }
 
 @media (max-width: 1110px)

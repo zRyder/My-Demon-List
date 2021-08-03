@@ -2,8 +2,10 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="stylesheets/mainsheet.css" rel="stylesheet">
     <link href="stylesheets/button.css" rel="stylesheet">
+    <link href="stylesheets/signup.css" rel="stylesheet">
     <title>My Demon List - Home</title>
 </head>
 
@@ -11,7 +13,7 @@
 <div id="header">
     <div class="upper_header">
         <div>
-            <img src = "images/mydemonlistlogo.png" alt="My Demon List" style="max-height: 60px; width: 220px; "onclick="location.href='index.html'">
+            <img src = "images/mydemonlistlogo.png" alt="My Demon List" style="max-height: 60px; max-width: 100%; "onclick="location.href='index.html'">
         </div>
         <div class="user_block">
             <button class="user_buttons" style="background-color: #4a87ce" onclick="location.href='log_in.html'">Log In</button>
@@ -50,7 +52,28 @@
     <div class="hamburger_elements">Contact</div>
 </div>
 <div id="container">
-    Sign up
+    <div class="signup_form_container">
+        <p class="text_font text_font_heading">Create an account to use MyDemonList</p>
+        <p class="text_font text_font_light">Join MyDemonList to rate your favorite Geometry Dash Demons, compare rankings between other Demons, and create your own Demon lists, and more. It's completely <b>free</b>.</p>
+
+        <form method="post" class="signup_form" id="signup_form" onsubmit="create_account()">
+            <label for="email" class="text_font signup_form_label">Email</label>
+            <p class="text_font text_font_lighter">Be sure your email is correct as you <b>will not</b> be able to change this later.</p>
+            <input type="text" id="email" name="email" class="signup_form_small_textbox">
+
+            <label for="user_name" class="text_font signup_form_label">Username</label>
+            <p class="text_font text_font_lighter">Usernames must only contain letters and numbers.</p>
+            <input type="text" id="user_name" name="user_name" class="signup_form_small_textbox">
+
+            <label for="password" class="text_font signup_form_label">Password</label>
+            <p class="text_font text_font_lighter">Password must contain at least one number, symbol and a capital letter</p>
+            <input type="password" id="password" name="password" class="signup_form_small_textbox">
+
+            <input type="submit" value="Create Account" id="signup_submit" class="text_font">
+        </form>
+    </div>
 </div>
+<script src="scripts/hamburger.js"></script>
+<script src="scripts/sign_up.js"></script>
 </body>
 </html>

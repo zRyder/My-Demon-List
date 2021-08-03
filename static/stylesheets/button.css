@@ -9,10 +9,35 @@
     font-weight: bold;
     font-size: 14px;
     background-color: #FFFFFF;
+    transition: 0.3s;
+    border-radius: 3px;
 }
 
 .user_buttons:hover{
-    filter: opacity(75%);
+    filter: saturate(60%) brightness(150%);
     text-decoration: underline;
     cursor: pointer;
+    border-radius: 3px;
+}
+
+input[type=submit] {
+    background-color: #cd4242;
+    font-size: 16px;
+    color: #FFFFFF;
+    border: 0 none;
+    height: 40px;
+    width: auto;
+    transition: 0.3s;
+    border-radius: 3px;
+}
+
+input[type=submit]:hover {
+    filter: saturate(60%) brightness(150%);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+input[type=submit]:disabled {
+    filter: brightness(50%);
+    text-decoration: none;
 }

@@ -57,7 +57,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     else {
         error!("invalid username {:?}", &create_info.user_name);
         return ApiResponse {
-            json: Json("invalid username".to_string()),
+            json: Json("{\"message\": \"invalid username\"}".to_string()),
             status: Status::BadRequest,
         }
     }
@@ -69,7 +69,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     else {
         error!("malformed password");
         return ApiResponse {
-            json: Json("malformed password".to_string()),
+            json: Json("{\"message\": \"malformed password\"}".to_string()),
             status: Status::BadRequest,
         }
     }
@@ -81,7 +81,7 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
     else {
         error!("invalid email_address {:?}", &create_info.email);
         return ApiResponse {
-            json: Json("invalid email address".to_string()),
+            json: Json("{\"message\": \"invalid email address\"}".to_string()),
             status: Status::BadRequest,
         }
     }
@@ -115,8 +115,8 @@ pub fn create_user(db_conn: crate::DbConnection, create_info: Form<user::CreateU
                     info!("initiating new account verification setup");
                     mail::send_verification_email(&db_conn, &db_user_entry.user_id, &db_user_entry.email);
                     ApiResponse {
-                        json: Json("message: user added successfully".to_string()),
-                        status: Status::Ok,
+                        json: Json("{\"message\": \"user added successfully\"}".to_string()),
+                        status: Status::Created,
                     }
                 }
                 Err(e) => {
@@ -160,7 +160,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
 
     if login_info.user_name.is_empty() || login_info.password.is_empty() {
         return ApiResponse {
-            json: Json("username or password is empty".to_string()),
+            json: Json("{\"message\": \"username or password is empty\"}".to_string()),
             status: Status::BadRequest
         }
     }
@@ -191,7 +191,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
                                         cookies.add_private(user_cookie);
 
                                         ApiResponse {
-                                            json: Json("login successful".to_string()),
+                                            json: Json("{\"message\": \"login successful\"}".to_string()),
                                             status: Status::Ok
                                         }
                                     }
@@ -202,7 +202,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
                             }
                             else {
                                 ApiResponse {
-                                    json: Json("invalid password".to_string()),
+                                    json: Json("{\"message\": \"invalid password\"}".to_string()),
                                     status: Status::Forbidden
                                 }
                             }
@@ -217,7 +217,7 @@ pub fn login_user(db_conn: crate::DbConnection, login_info: Form<auth::LoginUser
                 }
                 None => {
                     ApiResponse {
-                        json: Json("user does not exists".to_string()),
+                        json: Json("{\"message\": \"user does not exists\"}".to_string()),
                         status: Status::NotFound
                     }
                 }
@@ -248,7 +248,7 @@ pub fn update_username(db_conn: crate::DbConnection, new_username: Form<user::Up
                         .execute(&db_conn.0) {
                         Ok(_result) => {
                             ApiResponse {
-                                json: Json("Username successfully updated".to_string()),
+                                json: Json("{\"message\": \"username successfully updated\"}".to_string()),
                                 status: Status::Ok
                             }
                         }
@@ -259,7 +259,7 @@ pub fn update_username(db_conn: crate::DbConnection, new_username: Form<user::Up
                 }
                 None => {
                     ApiResponse {
-                        json: Json("User is not logged in, session expired or does not exist".to_string()),
+                        json: Json("{\"message\": \"user is not logged in\"}".to_string()),
                         status: Status::Unauthorized
                     }
                 }
@@ -267,7 +267,7 @@ pub fn update_username(db_conn: crate::DbConnection, new_username: Form<user::Up
         }
         None => {
             ApiResponse{
-                json: Json("user is not logged in".to_string()),
+                json: Json("{\"message\": \"user is not logged in\"}".to_string()),
                 status: Status::Unauthorized
             }
         }
@@ -287,7 +287,7 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
     if !user::is_valid_password(&new_password.new_password)
     {
         return ApiResponse {
-            json: Json("New password is invalid".to_string()),
+            json: Json("{message: new password is invalid}".to_string()),
             status: Status::BadRequest
         }
     }
@@ -306,7 +306,7 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
                                     .execute(&db_conn.0) {
                                     Ok(_result) => {
                                         ApiResponse {
-                                            json: Json("Password updated successfully".to_string()),
+                                            json: Json("{\"message\": \"password updated successfully\"}".to_string()),
                                             status: Status::Ok
                                         }
                                     }
@@ -317,7 +317,7 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
                             }
                             else {
                                 ApiResponse {
-                                    json: Json("current password is incorrect".to_string()),
+                                    json: Json("{\"message\": \"current password is incorrect\"}".to_string()),
                                     status: Status::Forbidden
                                 }
                             }
@@ -332,7 +332,7 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
                 }
                 None => {
                     ApiResponse {
-                        json: Json("User is not logged in, session expired or does not exist".to_string()),
+                        json: Json("{\"message\": \"user is not logged in\"}".to_string()),
                         status: Status::Unauthorized
                     }
                 }
@@ -340,7 +340,7 @@ pub fn update_password(db_conn: crate::DbConnection, new_password: Form<user::Up
         }
         None => {
             ApiResponse{
-                json: Json("user is not logged in".to_string()),
+                json: Json("{message: user is not logged in}".to_string()),
                 status: Status::Unauthorized
             }
         }
@@ -377,7 +377,7 @@ pub fn verify_user(db_conn: crate::DbConnection, verification_id: &RawStr) -> Ap
                     if Utc::now().naive_utc() > verify_user.2 {
                         warn!("verification code {:?} has expired for user {:?}", &verification_id.as_str(), &verify_user);
                         return ApiResponse {
-                            json: Json("{message: verification code has expired}".to_string()),
+                            json: Json("{\"message\": \"verification code has expired\"}".to_string()),
                             status: Status::Conflict
                         }
                     }
@@ -387,7 +387,7 @@ pub fn verify_user(db_conn: crate::DbConnection, verification_id: &RawStr) -> Ap
                         Ok(_update_check) => {
                             info!("user with info {:?} verified", verify_user);
                             ApiResponse{
-                                json: Json("{message: user successfully verified}".to_string()),
+                                json: Json("{\"message\": \"user successfully verified\"}".to_string()),
                                 status: Status::Ok
                             }
                         }
@@ -399,7 +399,7 @@ pub fn verify_user(db_conn: crate::DbConnection, verification_id: &RawStr) -> Ap
                 None => {
                     warn!("verification code could not be found");
                     ApiResponse{
-                        json: Json("{message: no user with given verification code}".to_string()),
+                        json: Json("{\"message\": \"no user with given verification code\"}".to_string()),
                         status: Status::NotFound
                     }
                 }

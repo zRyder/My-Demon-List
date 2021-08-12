@@ -1,0 +1,96 @@
+@charset "UTF-8";
+
+.form_container {
+    width: 60%;
+    max-width: 720px;
+    height: auto;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 3% 5%;
+}
+
+.form{
+    height: auto;
+    width: 50%;
+    max-width: 240px;
+    padding: 5% 15%;
+    display: flex;
+    flex-flow: column wrap;
+    border: 2px solid #6592c5;
+    background-color: #f0f1ff;
+}
+
+.form_label{
+    font-size: 14px;
+    padding: 0% 0% 2% 0%;
+}
+
+.form_small_textbox {
+    width: 100%;
+    height: 25px;
+    margin-bottom: 10%;
+}
+
+@media (max-width: 640px) {
+    .form_container{
+        width: 100%;
+    }
+}
+
+.text_font_lighter.error {
+    color: #f30000;
+    display: none;
+}
+
+.text_font_light.error {
+    color: #f30000;
+}
+
+.form_small_textbox.textbox_error {
+    border-color: #f30000;
+    color: #f30000;
+}
+
+.signup_modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    overflow: hidden;
+}
+
+.modal_content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.close {
+    position: fixed;
+    top: 105px;
+    right: 10%;
+    color: #aaaaaa;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}

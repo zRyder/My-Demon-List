@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="stylesheets/mainsheet.css" rel="stylesheet">
     <link href="stylesheets/button.css" rel="stylesheet">
+    <link href="stylesheets/form.css" rel="stylesheet">
     <title>My Demon List - Home</title>
 </head>
 
@@ -16,7 +17,7 @@
         </div>
         <div class="user_block">
             <button class="user_buttons" style="background-color: #4a87ce" onclick="location.href='log_in.html'">Log In</button>
-            <button class="user_buttons" style="background-color: #cd4242" onclick="location.href='sign_up.html'">Sign up</button>
+            <button class="user_buttons" style="background-color: #cd4242" onclick="location.href='register.html'">Sign up</button>
         </div>
     </div>
     <div id="navbar">
@@ -51,8 +52,29 @@
     <div class="hamburger_elements">Contact</div>
 </div>
 <div id="container">
-    Log in
+    <div class="form_container">
+        <img src="images/mydemonlistlogo.png" style="max-height: 200px; max-width: 300px;">
+        <p class="text_font text_font_heading">Login To MyDemonList</p>
+        <p class="text_font text_font_light">Login to your MyDemonList account to get full access to MyDemonList</p>
+
+        <form method="post" class="form" id="login_form" onsubmit="login_account()">
+            <label for="user_name" class="text_font form_label">Username</label>
+            <p class="text_font_lighter error" id="user_name_error">Username is invalid</p>
+            <input type="text" id="user_name" name="user_name" class="form_small_textbox">
+
+            <label for="password" class="text_font form_label">Password</label>
+            <p class="text_font_lighter error" id="password_error">Password is invalid</p>
+            <input type="password" id="password" name="password" class="form_small_textbox">
+
+            <p class="text_font text_font_lighter" style="padding-bottom: 10px;"><a href="index.html">Forgot username?</a></p>
+            <p class="text_font text_font_lighter" style="padding-bottom: 10px;"><a href="index.html">Forgot password?</a></p>
+            <input type="submit" value="Login" id="login_submit" class="text_font" disabled>
+            <p class="text_font_light error" id="login_error"></p>
+        </form>
+        <p class="text_font text_font_light">Need a MyDemonList account? <a href="register.html">Create one here.</a></p>
+    </div>
 </div>
 <script src="scripts/hamburger.js"></script>
+<script src="scripts/login.js"></script>
 </body>
 </html>

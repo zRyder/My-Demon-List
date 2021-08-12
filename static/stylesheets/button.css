@@ -8,7 +8,7 @@
     color: #FFFFFF;
     font-weight: bold;
     font-size: 14px;
-    background-color: #FFFFFF;
+    background-color: #4a87ce;
     transition: 0.3s;
     border-radius: 3px;
 }
@@ -29,6 +29,7 @@ input[type=submit] {
     width: auto;
     transition: 0.3s;
     border-radius: 3px;
+    disabled: true;
 }
 
 input[type=submit]:hover {

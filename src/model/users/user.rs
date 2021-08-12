@@ -80,7 +80,7 @@ pub(super) fn is_valid_email(email: &String) -> bool {
     //THIS REGEX WILL VALIDATE EMAIL ADDRESSES DO NOT CHANGE
     let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
 
-    if email_regex.is_match(email) {
+    if email_regex.is_match(&*email.to_lowercase()) {
         true
     }
     else {

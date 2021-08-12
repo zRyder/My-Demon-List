@@ -212,6 +212,7 @@
 }
 
 .text_font_heading{
+	font-family: Verdana, Montserrat, Arial;
 	font-size: 20px;
 	font-weight: bold;
 	padding: 2% 0px 2% 0px;
@@ -219,6 +220,7 @@
 }
 
 .text_font_light{
+	font-family: Verdana, Montserrat, Arial;
 	font-size: 14px;
 	font-weight: lighter;
 	color: #8f8f8f;
@@ -227,6 +229,7 @@
 }
 
 .text_font_lighter{
+	font-family: Verdana, Montserrat, Arial;
 	font-size: 12px;
 	font-weight: lighter;
 	color: #8f8f8f;

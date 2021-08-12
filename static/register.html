@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="stylesheets/mainsheet.css" rel="stylesheet">
     <link href="stylesheets/button.css" rel="stylesheet">
-    <link href="stylesheets/signup.css" rel="stylesheet">
+    <link href="stylesheets/form.css" rel="stylesheet">
     <title>My Demon List - Home</title>
 </head>
 
@@ -17,7 +17,7 @@
         </div>
         <div class="user_block">
             <button class="user_buttons" style="background-color: #4a87ce" onclick="location.href='log_in.html'">Log In</button>
-            <button class="user_buttons" style="background-color: #cd4242" onclick="location.href='sign_up.html'">Sign up</button>
+            <button class="user_buttons" style="background-color: #cd4242" onclick="location.href='register.html'">Sign up</button>
         </div>
     </div>
     <div id="navbar">
@@ -52,28 +52,49 @@
     <div class="hamburger_elements">Contact</div>
 </div>
 <div id="container">
-    <div class="signup_form_container">
+    <div class="form_container">
+        <img src="images/mydemonlistlogo.png" style="max-height: 200px; max-width: 300px;">
         <p class="text_font text_font_heading">Create an account to use MyDemonList</p>
         <p class="text_font text_font_light">Join MyDemonList to rate your favorite Geometry Dash Demons, compare rankings between other Demons, and create your own Demon lists, and more. It's completely <b>free</b>.</p>
 
-        <form method="post" class="signup_form" id="signup_form" onsubmit="create_account()">
-            <label for="email" class="text_font signup_form_label">Email</label>
-            <p class="text_font text_font_lighter">Be sure your email is correct as you <b>will not</b> be able to change this later.</p>
-            <input type="text" id="email" name="email" class="signup_form_small_textbox">
+        <form method="post" class="form" id="signup_form" onsubmit="create_account()">
+            <label for="email" class="text_font form_label">Email</label>
+            <p class="text_font text_font_lighter">Be sure your email is correct as you will not be able to change this later.</p>
+            <p class="text_font_lighter error" id="email_error">Email is invalid</p>
+            <input type="text" id="email" name="email" class="form_small_textbox">
 
-            <label for="user_name" class="text_font signup_form_label">Username</label>
+            <label for="user_name" class="text_font form_label">Username</label>
             <p class="text_font text_font_lighter">Usernames must only contain letters and numbers.</p>
-            <input type="text" id="user_name" name="user_name" class="signup_form_small_textbox">
+            <p class="text_font_lighter error" id="user_name_error">Username is invalid</p>
+            <input type="text" id="user_name" name="user_name" class="form_small_textbox">
 
-            <label for="password" class="text_font signup_form_label">Password</label>
+            <label for="password" class="text_font form_label">Password</label>
             <p class="text_font text_font_lighter">Password must contain at least one number, symbol and a capital letter</p>
-            <input type="password" id="password" name="password" class="signup_form_small_textbox">
+            <p class="text_font_lighter error" id="password_error">Password is invalid</p>
+            <input type="password" id="password" name="password" class="form_small_textbox">
 
-            <input type="submit" value="Create Account" id="signup_submit" class="text_font">
+
+            <label for="repeat_password" class="text_font form_label">Re-enter password</label>
+            <p class="text_font text_font_lighter">Password should match exactly as entered above</p>
+            <p class="text_font_lighter error" id="repeat_password_error">Passwords do not match</p>
+            <input type="password" id="repeat_password" class="form_small_textbox">
+
+            <input type="submit" value="Create Account" id="signup_submit" class="text_font" disabled>
         </form>
+        <p class="text_font text_font_light">Already have a MyDemonList account? <a href="log_in.html">Log in here.</a></p>
     </div>
 </div>
+
+<div id="signup_modal" class="signup_modal">
+    <div class="modal_content">
+        <span class="close">&times;</span>
+        <p class="text_font text_font_heading" id="signup_heading"></p>
+        <p class="text_font text_font_light" id="signup_content"></p>
+        <button class="user_buttons" onclick="close_modal()">Ok</button>
+    </div>
+</div>
+
 <script src="scripts/hamburger.js"></script>
-<script src="scripts/sign_up.js"></script>
+<script src="scripts/register.js"></script>
 </body>
 </html>

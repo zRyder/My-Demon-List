@@ -60,7 +60,7 @@ pub mod tests
     {
         let test = crate::model::users::user::CreateUser {
             user_name: "Test".to_string(),
-            email: "something@domain.com".to_string(),
+            email: "kingdomhearts7673@gmail.com".to_string(),
             password: "".to_string(),
         };
         assert_eq!(true, user::is_valid_email(&test.email));
